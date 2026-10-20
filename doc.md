@@ -310,9 +310,10 @@ A estrutura é uma proposta inicial e deverá acompanhar a organização real do
 
 ## 16. Equipe e informações do projeto
 
-**Projeto:** MediFlow  
-**Programa:** Oracle Next Education (ONE) + Alura  
-**Equipe:** Grupo 3  
+**Projeto:** Mediflow </br>
+**Programa:** ONE + Alura </br>
+**Equipe:** Grupo 3
+
 ---
 
-*Este documento deverá ser atualizado conforme os componentes forem implementados, testados e integrados. Requisitos planejados não devem ser apresentados como funcionalidades concluídas antes de sua validação.*
+*Este documento deverá ser atualizado conforme os componentes forem implementados, testados e integrados.*
