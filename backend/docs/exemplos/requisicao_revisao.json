@@ -1,0 +1,9 @@
+{
+  "decisao": "aprovar",
+  "justificativa": "CRM corrigido conforme o carimbo do documento original",
+  "correcoes": [
+    {"campo": "medico_solicitante.crm", "valor_posterior": "128456"}
+  ],
+  "revisor": "revisor.exemplo",
+  "versao_resultado_base": 1
+}
