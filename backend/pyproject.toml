@@ -1,0 +1,29 @@
+[project]
+name = "mediflow-backend"
+version = "0.1.0"
+description = "MediFlow — backend do Agente Inteligente de Triagem Clínica (Hackathon ONE)"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+    "RUF001",  # textos em português com acentos e aspas tipográficas
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = [
+    "oci_real: testes de integração real com o OCI Object Storage (desabilitados por padrão)",
+]
