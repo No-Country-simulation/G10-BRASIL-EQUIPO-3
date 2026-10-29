@@ -37,7 +37,7 @@ backend/
 └── pyproject.toml            # configuração do Ruff e do pytest
 ```
 
-Veja `docs/contratos.md` para os contratos e `docs/exemplos/` para JSONs dos seis cenários.
+Veja `backend/docs/contratos.md` para os contratos e `docs/exemplos/` para JSONs dos seis cenários.
 
 ## Segurança
 
