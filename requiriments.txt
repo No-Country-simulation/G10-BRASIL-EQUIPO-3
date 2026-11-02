@@ -1,1 +1,9 @@
  a ser desenvolvido ainda :)
+
+ fastapi
+uvicorn[standard]
+pydantic
+pymupdf
+python-multipart
+pytest
+httpx
