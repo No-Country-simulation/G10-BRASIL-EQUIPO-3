@@ -1,0 +1,15 @@
+# Ambiente virtual Python
+.venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Cache dos testes
+.pytest_cache/
+
+# Configurações e credenciais
+.env
+.env.*
+!.env.example
+*.pem
