@@ -5,3 +5,4 @@ ruff==0.17.3
 PyMuPDF==1.28.2
 Pillow==12.3.0
 google-genai==2.33.0
+groq==1.7.0
