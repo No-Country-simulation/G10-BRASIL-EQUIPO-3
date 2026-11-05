@@ -1,0 +1,20 @@
+{
+    "root": [
+        "./src/main.tsx",
+        "./src/vite-env.d.ts",
+        "./src/components/Layout.tsx",
+        "./src/components/StatCard.tsx",
+        "./src/components/StatusBadge.tsx",
+        "./src/mocks/data.ts",
+        "./src/pages/Dashboard.tsx",
+        "./src/pages/History.tsx",
+        "./src/pages/Queue.tsx",
+        "./src/pages/Review.tsx",
+        "./src/pages/Settings.tsx",
+        "./src/pages/Upload.tsx",
+        "./src/services/api.ts",
+        "./src/types/index.ts"
+    ],
+    "errors": true,
+    "version": "5.8.3"
+}
