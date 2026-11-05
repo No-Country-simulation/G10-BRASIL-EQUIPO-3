@@ -1,6 +1,7 @@
 
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator
+from datetime import datetime
 
 
 # 1. TIPOS DE ARQUIVO
@@ -87,3 +88,100 @@ class DocumentoRecebido(BaseModel):
     tipo_arquivo: TipoArquivo
     canal_origem: CanalOrigem
     mensagem: str
+    
+    
+    
+# Modelos de dados extraídos
+
+class Paciente(BaseModel):
+    nome: str | None = None
+    idade: int | None = Field(default=None, ge=0)
+
+
+class MedicoSolicitante(BaseModel):
+    nome: str | None = None
+    crm: str | None = None
+
+
+class Classificacao(BaseModel):
+    tipo_documento: TipoDocumento
+    especialidade: str | None = None
+    nivel_prioridade: NivelPrioridade
+    score_confianca_classificacao: float = Field(
+        ge=0,
+        le=1
+    )
+
+
+class DadosExtraidos(BaseModel):
+    paciente: Paciente | None = None
+    medico_solicitante: MedicoSolicitante | None = None
+    exame_realizado: str | None = None
+    diagnostico_principal: str | None = None
+    cid_sugerido: str | None = None
+    medicamentos: list[str] = Field(default_factory=list)
+
+
+class ScoresPorCampo(BaseModel):
+    paciente: float | None = Field(
+        default=None, ge=0, le=1
+    )
+    crm: float | None = Field(
+        default=None, ge=0, le=1
+    )
+    medicamento: float | None = Field(
+        default=None, ge=0, le=1
+    )
+    dosagem: float | None = Field(
+        default=None, ge=0, le=1
+    )
+    diagnostico: float | None = Field(
+        default=None, ge=0, le=1
+    )
+    
+    
+    
+
+
+class Notificacao(BaseModel):
+    canal: str
+    mensagem: str
+
+
+class DecisaoRoteamento(BaseModel):
+    destino_principal: Destino | None = None
+    requer_auditoria_humana: bool
+    justificativa_roteamento: str
+    notificacao_gerada: Notificacao | None = None
+
+
+class ArmazenamentoOCI(BaseModel):
+    bucket: str | None = None
+    caminho_objeto: str | None = None
+    persistido: bool = False
+
+
+class RegistroRevisao(BaseModel):
+    responsavel: str
+    data: datetime
+    decisao: str
+    justificativa: str
+    correcoes: dict[str, str] = Field(default_factory=dict)
+
+
+class RespostaTriagem(BaseModel):
+    documento_id: str
+    status: StatusDocumento
+
+    classificacao: Classificacao | None = None
+    dados_extraidos: DadosExtraidos | None = None
+    scores_por_campo: ScoresPorCampo | None = None
+
+    decisao_roteamento: DecisaoRoteamento | None = None
+    armazenamento_oci: ArmazenamentoOCI | None = None
+
+    historico_revisao: list[RegistroRevisao] = Field(
+        default_factory=list
+    )
+
+
