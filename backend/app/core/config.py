@@ -18,10 +18,11 @@ class Settings(BaseSettings):
 
     app_env: Literal["development", "test", "production"] = "development"
 
-    # "mock" = provedor simulado (dados de teste). "gemini" exige modelo e chave.
-    llm_provider: Literal["mock", "gemini"] = "mock"
+    # "mock" = provedor simulado (dados de teste).
+    llm_provider: Literal["mock", "gemini", "groq"] = "mock"
     llm_model: str | None = None
     llm_api_key: SecretStr | None = None  # nunca aparece em repr/logs
+    groq_api_key: SecretStr | None = None  # chave específica do Groq; nunca aparece em repr/logs
     llm_timeout_seconds: Annotated[float, Field(gt=0, le=600)] = 30
 
     confidence_threshold: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)] = 0.80
@@ -43,6 +44,11 @@ class Settings(BaseSettings):
                 faltando.append("LLM_MODEL")
             if self.llm_api_key is None:
                 faltando.append("LLM_API_KEY")
+        if self.llm_provider == "groq":
+            if not self.llm_model:
+                faltando.append("LLM_MODEL")
+            if self.groq_api_key is None:
+                faltando.append("GROQ_API_KEY")
         if self.storage_backend == "oci":
             for nome, valor in (
                 ("OCI_NAMESPACE", self.oci_namespace),
