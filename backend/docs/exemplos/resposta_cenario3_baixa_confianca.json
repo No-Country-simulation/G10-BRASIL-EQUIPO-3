@@ -1,0 +1,68 @@
+{
+  "documento_id": "DOC-BAIXA-CONF-0001",
+  "status": "em_auditoria",
+  "versao_resultado": 1,
+  "canal_origem": "AMBULATORIO",
+  "classificacao": {
+    "tipo_documento": "receita_medica",
+    "especialidade": "Clínica médica",
+    "prioridade": "rotina",
+    "urgente": false,
+    "score_confianca_classificacao": 0.96,
+    "sinais_urgencia": []
+  },
+  "dados_extraidos": {
+    "paciente": {
+      "nome": {"valor": "Maria Aparecida Souza", "confianca": 0.98, "evidencia": "Paciente: Maria Aparecida Souza"}
+    },
+    "medico_solicitante": {
+      "nome": {"valor": "Dr. João Pereira Lima", "confianca": 0.96, "evidencia": "Dr. João Pereira Lima"},
+      "crm": {"valor": "123456", "confianca": 0.45, "evidencia": "CRM-SP 12?456 (carimbo borrado)"},
+      "uf_crm": {"valor": "SP", "confianca": 0.9, "evidencia": "CRM-SP"}
+    },
+    "medicamentos": [
+      {
+        "nome": {"valor": "Amoxicilina", "confianca": 0.92, "evidencia": "Amoxicilina 500 mg"},
+        "dosagem": {"valor": "500 mg", "confianca": 0.9, "evidencia": "Amoxicilina 500 mg"},
+        "posologia": {"valor": "1 cápsula a cada 8 horas por 7 dias", "confianca": 0.9, "evidencia": "1 cápsula de 8/8h por 7 dias"}
+      }
+    ],
+    "datas": {
+      "emissao": {"valor": "2026-10-20", "confianca": 0.91, "evidencia": "20/10/2026"}
+    },
+    "score_confianca_extracao": 0.82
+  },
+  "validacoes": [
+    {
+      "codigo": "baixa_confianca",
+      "descricao": "Score do CRM (0,45) abaixo do limiar de referência (0,80)",
+      "gravidade": "alta",
+      "campos_afetados": ["medico_solicitante.crm"],
+      "evidencia": "CRM-SP 12?456 (carimbo borrado)",
+      "acao_sugerida": "Conferir o número do CRM no documento original"
+    }
+  ],
+  "decisao_roteamento": {
+    "destino": "FILA_REVISAO_HUMANA",
+    "prioridade": "rotina",
+    "urgente": false,
+    "requer_auditoria_humana": true,
+    "motivo": "Score do CRM abaixo do limiar de referência",
+    "codigo_motivo": "baixa_confianca_campo_obrigatorio",
+    "justificativa_roteamento": "Documento não urgente com campo obrigatório (CRM) abaixo do limiar; roteamento automático não permitido.",
+    "status_revisao": "pendente",
+    "notificacao_gerada": null
+  },
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "auditoria_humana/DOC-BAIXA-CONF-0001/resultado_v001.json",
+    "referencia_documento": "recebidos/DOC-BAIXA-CONF-0001/original.png",
+    "referencia_resultado": "auditoria_humana/DOC-BAIXA-CONF-0001/resultado_v001.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [],
+  "erro": null,
+  "origem_analise": {"provedor": "mock", "modelo": null, "dados_de_teste": true}
+}

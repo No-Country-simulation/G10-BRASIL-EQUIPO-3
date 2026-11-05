@@ -1,0 +1,24 @@
+{
+  "documento_id": "DOC-ERRO-0001",
+  "status": "erro",
+  "versao_resultado": 1,
+  "canal_origem": "LABORATORIO",
+  "validacoes": [],
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "falhas_processamento/DOC-ERRO-0001/original.pdf",
+    "referencia_documento": "falhas_processamento/DOC-ERRO-0001/original.pdf",
+    "referencia_resultado": "falhas_processamento/DOC-ERRO-0001/resultado_v001.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [],
+  "erro": {
+    "codigo": "arquivo_corrompido",
+    "descricao": "Não foi possível abrir o PDF: estrutura do arquivo inválida.",
+    "etapa": "normalize_document",
+    "ocorrido_em": "2026-10-28T14:32:10-03:00"
+  },
+  "origem_analise": null
+}

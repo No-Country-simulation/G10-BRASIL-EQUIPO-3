@@ -1,0 +1,73 @@
+{
+  "documento_id": "DOC-BAIXA-CONF-0001",
+  "status": "aprovado_auditoria",
+  "versao_resultado": 2,
+  "canal_origem": "AMBULATORIO",
+  "classificacao": {
+    "tipo_documento": "receita_medica",
+    "especialidade": "Clínica médica",
+    "prioridade": "rotina",
+    "urgente": false,
+    "score_confianca_classificacao": 0.96,
+    "sinais_urgencia": []
+  },
+  "dados_extraidos": {
+    "paciente": {
+      "nome": {"valor": "Maria Aparecida Souza", "confianca": 0.98, "evidencia": "Paciente: Maria Aparecida Souza"}
+    },
+    "medico_solicitante": {
+      "nome": {"valor": "Dr. João Pereira Lima", "confianca": 0.96, "evidencia": "Dr. João Pereira Lima"},
+      "crm": {"valor": "128456", "revisado_por_humano": true},
+      "uf_crm": {"valor": "SP", "confianca": 0.9, "evidencia": "CRM-SP"}
+    },
+    "medicamentos": [
+      {
+        "nome": {"valor": "Amoxicilina", "confianca": 0.92, "evidencia": "Amoxicilina 500 mg"},
+        "dosagem": {"valor": "500 mg", "confianca": 0.9, "evidencia": "Amoxicilina 500 mg"},
+        "posologia": {"valor": "1 cápsula a cada 8 horas por 7 dias", "confianca": 0.9, "evidencia": "1 cápsula de 8/8h por 7 dias"}
+      }
+    ],
+    "datas": {
+      "emissao": {"valor": "2026-10-20", "confianca": 0.91, "evidencia": "20/10/2026"}
+    },
+    "score_confianca_extracao": 0.82
+  },
+  "validacoes": [],
+  "decisao_roteamento": {
+    "destino": "FARMACIA_HOSPITALAR",
+    "prioridade": "rotina",
+    "urgente": false,
+    "requer_auditoria_humana": false,
+    "motivo": "Aprovado por revisão humana; roteado pela categoria sem nova chamada à IA",
+    "codigo_motivo": "aprovacao_humana",
+    "justificativa_roteamento": "Revisor corrigiu o CRM e aprovou o documento; roteamento determinístico pela categoria (receita médica).",
+    "status_revisao": "aprovada",
+    "notificacao_gerada": null
+  },
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "processados/DOC-BAIXA-CONF-0001/resultado_v002.json",
+    "referencia_documento": "recebidos/DOC-BAIXA-CONF-0001/original.png",
+    "referencia_resultado": "processados/DOC-BAIXA-CONF-0001/resultado_v002.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [
+    {
+      "documento_id": "DOC-BAIXA-CONF-0001",
+      "revisor": "revisor.exemplo",
+      "identidade_verificada": false,
+      "data_hora": "2026-10-28T15:05:00-03:00",
+      "decisao": "aprovar",
+      "justificativa": "CRM corrigido conforme o carimbo do documento original",
+      "correcoes": [
+        {"campo": "medico_solicitante.crm", "valor_anterior": "123456", "valor_posterior": "128456"}
+      ],
+      "versao_resultado_anterior": 1,
+      "versao_resultado_revisado": 2
+    }
+  ],
+  "erro": null,
+  "origem_analise": {"provedor": "mock", "modelo": null, "dados_de_teste": true}
+}

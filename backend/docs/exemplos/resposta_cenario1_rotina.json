@@ -1,0 +1,61 @@
+{
+  "documento_id": "DOC-ROTINA-0001",
+  "status": "processado",
+  "versao_resultado": 1,
+  "canal_origem": "AMBULATORIO",
+  "classificacao": {
+    "tipo_documento": "receita_medica",
+    "especialidade": "Clínica médica",
+    "prioridade": "rotina",
+    "urgente": false,
+    "score_confianca_classificacao": 0.97,
+    "sinais_urgencia": []
+  },
+  "dados_extraidos": {
+    "paciente": {
+      "nome": {"valor": "Maria Aparecida Souza", "confianca": 0.98, "evidencia": "Paciente: Maria Aparecida Souza"},
+      "idade": {"valor": 47, "confianca": 0.95, "evidencia": "47 anos"}
+    },
+    "medico_solicitante": {
+      "nome": {"valor": "Dr. João Pereira Lima", "confianca": 0.96, "evidencia": "Dr. João Pereira Lima"},
+      "crm": {"valor": "123456", "confianca": 0.93, "evidencia": "CRM-SP 123456"},
+      "uf_crm": {"valor": "SP", "confianca": 0.93, "evidencia": "CRM-SP 123456"}
+    },
+    "diagnostico_principal": {"valor": "Faringoamigdalite aguda", "confianca": 0.9, "evidencia": "Dx: faringoamigdalite aguda"},
+    "medicamentos": [
+      {
+        "nome": {"valor": "Amoxicilina", "confianca": 0.94, "evidencia": "Amoxicilina 500 mg"},
+        "dosagem": {"valor": "500 mg", "confianca": 0.92, "evidencia": "Amoxicilina 500 mg"},
+        "posologia": {"valor": "1 cápsula a cada 8 horas por 7 dias", "confianca": 0.9, "evidencia": "1 cápsula de 8/8h por 7 dias"}
+      }
+    ],
+    "datas": {
+      "emissao": {"valor": "2026-10-20", "confianca": 0.91, "evidencia": "20/10/2026"}
+    },
+    "score_confianca_extracao": 0.93
+  },
+  "validacoes": [],
+  "decisao_roteamento": {
+    "destino": "FARMACIA_HOSPITALAR",
+    "prioridade": "rotina",
+    "urgente": false,
+    "requer_auditoria_humana": false,
+    "motivo": "Campos obrigatórios confiáveis e validações aprovadas",
+    "codigo_motivo": "criterios_atendidos",
+    "justificativa_roteamento": "Receita médica não urgente, com todos os campos obrigatórios acima do limiar; roteada pela categoria.",
+    "status_revisao": "nao_necessaria",
+    "notificacao_gerada": null
+  },
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "processados/DOC-ROTINA-0001/resultado_v001.json",
+    "referencia_documento": "recebidos/DOC-ROTINA-0001/original.txt",
+    "referencia_resultado": "processados/DOC-ROTINA-0001/resultado_v001.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [],
+  "erro": null,
+  "origem_analise": {"provedor": "mock", "modelo": null, "dados_de_teste": true}
+}

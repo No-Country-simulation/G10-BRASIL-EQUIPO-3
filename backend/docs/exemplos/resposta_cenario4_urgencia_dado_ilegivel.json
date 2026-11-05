@@ -1,0 +1,67 @@
+{
+  "documento_id": "DOC-URG-ILEG-0001",
+  "status": "em_auditoria",
+  "versao_resultado": 1,
+  "canal_origem": "PRONTO_SOCORRO",
+  "classificacao": {
+    "tipo_documento": "laudo_exame",
+    "especialidade": "Radiologia / Pneumologia",
+    "prioridade": "urgente",
+    "urgente": true,
+    "score_confianca_classificacao": 0.88,
+    "sinais_urgencia": [
+      {
+        "origem": "llm",
+        "descricao": "Achado compatível com TEP agudo",
+        "evidencia": "falha de enchimento em artéria pulmonar compatível com TEP agudo"
+      }
+    ]
+  },
+  "dados_extraidos": {
+    "paciente": {
+      "nome": {"situacao": "ilegivel", "evidencia": "nome do paciente borrado na imagem"},
+      "idade": {"valor": 61, "confianca": 0.55, "evidencia": "6? anos"}
+    },
+    "diagnostico_principal": {"valor": "Tromboembolismo Pulmonar Agudo (TEP)", "confianca": 0.85, "evidencia": "compatível com TEP agudo"},
+    "score_confianca_extracao": 0.5
+  },
+  "validacoes": [
+    {
+      "codigo": "campo_ilegivel",
+      "descricao": "Nome do paciente ilegível no documento",
+      "gravidade": "alta",
+      "campos_afetados": ["paciente.nome"],
+      "evidencia": "nome do paciente borrado na imagem",
+      "acao_sugerida": "Identificar o paciente no documento original antes de qualquer acionamento"
+    },
+    {
+      "codigo": "baixa_confianca",
+      "descricao": "Idade com score baixo (0,55)",
+      "gravidade": "media",
+      "campos_afetados": ["paciente.idade"]
+    }
+  ],
+  "decisao_roteamento": {
+    "destino": "FILA_REVISAO_HUMANA_PRIORITARIA",
+    "prioridade": "urgente",
+    "urgente": true,
+    "requer_auditoria_humana": true,
+    "motivo": "Urgência sinalizada, mas o paciente não pôde ser identificado",
+    "codigo_motivo": "urgencia_dado_critico_insuficiente",
+    "justificativa_roteamento": "Documento potencialmente urgente com campo crítico ilegível; prioridade urgente preservada e revisão humana prioritária obrigatória.",
+    "status_revisao": "pendente",
+    "notificacao_gerada": null
+  },
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "auditoria_humana/DOC-URG-ILEG-0001/resultado_v001.json",
+    "referencia_documento": "recebidos/DOC-URG-ILEG-0001/original.jpg",
+    "referencia_resultado": "auditoria_humana/DOC-URG-ILEG-0001/resultado_v001.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [],
+  "erro": null,
+  "origem_analise": {"provedor": "mock", "modelo": null, "dados_de_teste": true}
+}

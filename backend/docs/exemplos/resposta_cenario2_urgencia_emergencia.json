@@ -1,0 +1,76 @@
+{
+  "documento_id": "DOC-CLIN-2026-8942",
+  "status": "processado",
+  "versao_resultado": 1,
+  "canal_origem": "PRONTO_SOCORRO",
+  "classificacao": {
+    "tipo_documento": "laudo_exame",
+    "especialidade": "Radiologia / Pneumologia",
+    "prioridade": "urgente",
+    "urgente": true,
+    "score_confianca_classificacao": 0.99,
+    "sinais_urgencia": [
+      {
+        "origem": "llm",
+        "descricao": "Achado crítico compatível com tromboembolismo pulmonar agudo",
+        "evidencia": "Falha de enchimento em arteria pulmonar principal direita compativel com TEP agudo"
+      },
+      {
+        "origem": "regra",
+        "descricao": "Termo de urgência no documento",
+        "evidencia": "Sugere-se correlacao clinica urgente"
+      }
+    ]
+  },
+  "dados_extraidos": {
+    "paciente": {
+      "nome": {"valor": "Carlos Eduardo Mendes", "confianca": 0.98, "evidencia": "Paciente: Carlos Eduardo Mendes"},
+      "idade": {"valor": 52, "confianca": 0.97, "evidencia": "52 anos"}
+    },
+    "medico_solicitante": {
+      "nome": {"valor": "Dra. Renata Silveira", "confianca": 0.95, "evidencia": "Solicitante: Dra. Renata Silveira"},
+      "crm": {"valor": "145892", "confianca": 0.96, "evidencia": "CRM-SP 145892"},
+      "uf_crm": {"valor": "SP", "confianca": 0.96, "evidencia": "CRM-SP 145892"}
+    },
+    "diagnostico_principal": {"valor": "Tromboembolismo Pulmonar Agudo (TEP)", "confianca": 0.97, "evidencia": "Quadro compativel com Tromboembolismo Pulmonar Agudo"},
+    "cid10_sugerido": {"valor": "I26.9", "confianca": 0.8},
+    "conclusao": {"valor": "Quadro compativel com Tromboembolismo Pulmonar Agudo", "confianca": 0.97, "evidencia": "CONCLUSÃO: Quadro compativel com Tromboembolismo Pulmonar Agudo"},
+    "exames": [
+      {
+        "nome": {"valor": "Tomografia de Torax com contraste", "confianca": 0.98, "evidencia": "Exame: Tomografia de Torax com contraste"},
+        "tipo": "realizado"
+      }
+    ],
+    "score_confianca_extracao": 0.96
+  },
+  "validacoes": [],
+  "decisao_roteamento": {
+    "destino": "FILA_EMERGENCIA_MEDICA",
+    "prioridade": "urgente",
+    "urgente": true,
+    "requer_auditoria_humana": false,
+    "motivo": "Urgência sinalizada com paciente e evidência do achado confiáveis",
+    "codigo_motivo": "urgencia_confiavel",
+    "justificativa_roteamento": "Achado crítico de alta gravidade (TEP agudo) em paciente sintomático, com identificação do paciente e evidência textual confiáveis.",
+    "status_revisao": "nao_necessaria",
+    "notificacao_gerada": {
+      "canal": "Alerta_Plantao_Medico",
+      "mensagem": "ALERTA URGENTE: laudo com achado crítico compatível com TEP agudo para paciente do Pronto-Socorro.",
+      "gerada_em": "2026-10-28T14:30:00-03:00",
+      "documento_id": "DOC-CLIN-2026-8942",
+      "evidencias": ["Falha de enchimento em arteria pulmonar principal direita compativel com TEP agudo"]
+    }
+  },
+  "armazenamento_oci": {
+    "bucket": "mediflow-documentos-clinicos",
+    "caminho_objeto": "processados/urgentes/DOC-CLIN-2026-8942/resultado_v001.json",
+    "referencia_documento": "recebidos/DOC-CLIN-2026-8942/original.pdf",
+    "referencia_resultado": "processados/urgentes/DOC-CLIN-2026-8942/resultado_v001.json",
+    "persistido": true,
+    "status_backup": "sucesso",
+    "modo_armazenamento": "mock"
+  },
+  "historico_revisao": [],
+  "erro": null,
+  "origem_analise": {"provedor": "mock", "modelo": null, "dados_de_teste": true}
+}
