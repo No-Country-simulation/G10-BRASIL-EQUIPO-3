@@ -2,9 +2,9 @@
 
 Backend (Python) do **MediFlow — Agente Inteligente de Triagem Clínica**, projeto do Hackathon ONE.
 
-> **Estado atual: Fases 1, 2 e 3 concluídas.** Os provedores mock e Gemini estão disponíveis, e a
-> integração Groq foi validada com classificação e extração usando conteúdo sintético. API REST,
-> grafo LangGraph e armazenamento (mock e OCI) entram nas próximas fases.
+> **Estado atual: Fases 1, 2, 3 e 4 concluídas.** Inclui o workflow LangGraph, validações
+> determinísticas, roteamento e revisão humana em memória. API REST e armazenamento (mock e OCI)
+> entram nas próximas fases.
 
 ## Como executar os testes
 
@@ -19,7 +19,7 @@ ruff check . && ruff format --check .
 
 Requer Python 3.11 ou superior (testado com 3.12).
 
-## Estrutura (Fases 1 a 3; Groq validado)
+## Estrutura (Fases 1 a 4; Groq validado)
 
 ```text
 backend/
@@ -28,10 +28,10 @@ backend/
 │   ├── ingestion/             # validação e normalização de texto, PDF e imagens
 │   ├── providers/             # contrato, mock, Gemini, Groq e prompts
 │   ├── schemas/              # contratos Pydantic (fonte de verdade)
-│   └── rules/
-│       ├── policy.py         # campos obrigatórios e destino por categoria
-│       └── status.py         # transições de status permitidas
-├── tests/                    # pytest (ingestão e provedores, sem chamadas externas)
+│   ├── graph/                # workflow LangGraph da triagem
+│   ├── rules/                # validação, confiança, urgência e roteamento
+│   └── services/             # entrada da triagem e revisão humana em memória
+├── tests/                    # pytest (cenários determinísticos, sem chamadas externas)
 ├── docs/
 │   ├── contratos.md          # enums, invariantes e decisões dos contratos
 │   └── exemplos/*.json       # exemplos validados automaticamente pelos testes
@@ -55,6 +55,12 @@ schemas Pydantic. A integração Groq foi validada com conteúdo sintético; a i
 disponível, mas não foi validada com uma chamada externa bem-sucedida. Testes automatizados não usam
 rede ou chaves. Documentos enviados a um provedor externo são encaminhados ao serviço correspondente;
 use dados sintéticos nos testes e demonstrações.
+
+`app.services.TriageService` executa o workflow compilado em `app.graph.workflow`. Termos de
+urgência e medicamentos que exigem revisão podem ser configurados por `URGENCY_TERMS` e
+`HIGH_RISK_MEDICATIONS`; a lista de medicamentos de alto risco fica vazia até validação da equipe.
+Revisões alteram o resultado em memória, registram histórico e controle de versão e não repetem
+chamadas ao provedor. A identidade do revisor não é autenticada neste escopo.
 
 ## Segurança
 
