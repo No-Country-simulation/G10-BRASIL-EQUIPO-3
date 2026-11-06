@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     llm_timeout_seconds: Annotated[float, Field(gt=0, le=600)] = 30
 
     confidence_threshold: Annotated[float, Field(ge=0, le=1, allow_inf_nan=False)] = 0.80
+    urgency_terms: list[str] = Field(
+        default_factory=lambda: [
+            "tep agudo",
+            "tromboembolismo pulmonar agudo",
+            "correlacao clinica urgente",
+        ]
+    )
+    high_risk_medications: list[str] = Field(default_factory=list)
 
     storage_backend: Literal["mock", "oci"] = "mock"
     oci_namespace: str | None = None
