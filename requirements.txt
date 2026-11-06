@@ -6,3 +6,4 @@ PyMuPDF==1.28.2
 Pillow==12.3.0
 google-genai==2.33.0
 groq==1.7.0
+langgraph==1.2.19
