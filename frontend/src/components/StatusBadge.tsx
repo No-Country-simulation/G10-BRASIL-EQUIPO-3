@@ -1,0 +1,1 @@
+import type {Status} from '../types'; const labels:Record<Status,string>={processando:'Processando',pendente:'Pendente',revisao:'Em revisão',concluido:'Concluído',erro:'Erro'}; export function StatusBadge({status}:{status:Status}){return <span className={`badge ${status}`}>{labels[status]}</span>}

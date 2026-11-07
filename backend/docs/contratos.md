@@ -46,9 +46,23 @@ Ver `app/rules/policy.py`. Campos obrigatórios por categoria e destino automát
 (`outro`/`indeterminado` nunca são roteados automaticamente). A tabela de campos obrigatórios é
 uma proposta aprovada pela equipe e precisa de validação clínica.
 
+## Regras determinísticas (Fase 4)
+
+- A confiança dos campos obrigatórios considera valor presente, score mínimo e evidência literal
+  verificável no texto normalizado. O score geral da extração é apenas informativo.
+- CRM, UF, CID-10 documentado/sugerido e cronologia de admissão/alta têm validação de formato ou
+  coerência; campos obrigatórios ausentes, ilegíveis, com baixa confiança ou sem evidência geram
+  achados para conferência humana.
+- A urgência combina a classificação do provedor e termos configurados; despacho direto à emergência
+  exige paciente identificável, confiança suficiente e evidência verificável. Caso contrário, a
+  prioridade é mantida na fila humana prioritária.
+- Roteamento automático ocorre somente quando a categoria, a confiança e os critérios
+  determinísticos são satisfeitos. `outro` e `indeterminado` permanecem na fila humana.
+- Revisão humana aprova ou rejeita em memória, registra justificativa/correções e versão. Correções
+  não acionam novamente o provedor; o identificador do revisor não é autenticado.
+
 ## Pendências assumidas para as próximas fases
 
-- Formato (CRM, UF, CID-10), contradições e demais regras determinísticas: Fase 4.
-- Lista de medicamentos de alto risco: depende da equipe.
+- Lista de medicamentos de alto risco: depende de validação da equipe; a configuração começa vazia.
 - O snapshot gravado do resultado não contém `armazenamento_oci` (não pode afirmar a própria
   persistência); quem lê o objeto preenche o bloco após confirmar a gravação (Fases 6 e 7).

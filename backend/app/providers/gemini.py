@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, NoReturn, TypeVar
 
 from google import genai
@@ -18,6 +19,7 @@ from app.schemas.extraction import DadosExtraidos
 from app.schemas.output import OrigemAnalise
 
 ModeloSaida = TypeVar("ModeloSaida", ClassificacaoDocumento, DadosExtraidos)
+logger = logging.getLogger(__name__)
 
 # JSON Schema subset accepted by Gemini's response_json_schema. Pydantic adds defaults and
 # string-length constraints that aren't part of this endpoint's supported subset.
@@ -35,7 +37,6 @@ _CHAVES_SCHEMA_GEMINI = frozenset(
         "items",
         "prefixItems",
         "minItems",
-        "maxItems",
         "minimum",
         "maximum",
         "anyOf",
@@ -70,6 +71,13 @@ def _schema_json_gemini(modelo: type[ModeloSaida]) -> dict[str, Any]:
                 ]
             else:
                 resultado[chave] = valor
+
+        # Structured output expects each object property to be accounted for in `required`.
+        # Pydantic omits fields with defaults from this list, although the application contract
+        # still expects them. Nullable fields can be emitted as null and then validated normally.
+        propriedades = resultado.get("properties")
+        if isinstance(propriedades, dict):
+            resultado["required"] = list(propriedades)
         return resultado
 
     return filtrar_schema(schema)
@@ -98,7 +106,9 @@ class GeminiProvider(LLMProvider):
         return OrigemAnalise(provedor="gemini", modelo=self.modelo, dados_de_teste=False)
 
     def classificar(self, documento: DocumentoNormalizado) -> ClassificacaoDocumento:
-        return self._gerar(documento, PROMPT_CLASSIFICACAO, ClassificacaoDocumento)
+        return self._gerar(
+            documento, PROMPT_CLASSIFICACAO, ClassificacaoDocumento, etapa="classificacao"
+        )
 
     def extrair(
         self, documento: DocumentoNormalizado, classificacao: ClassificacaoDocumento
@@ -107,10 +117,17 @@ class GeminiProvider(LLMProvider):
             f"Categoria previamente classificada: {classificacao.tipo_documento.value}. "
             "Use essa categoria apenas como contexto; não infira campos sem evidência.\n\n"
         )
-        return self._gerar(documento, contexto + PROMPT_EXTRACAO, DadosExtraidos)
+        return self._gerar(
+            documento, contexto + PROMPT_EXTRACAO, DadosExtraidos, etapa="extracao"
+        )
 
     def _gerar(
-        self, documento: DocumentoNormalizado, instrucao: str, modelo_saida: type[ModeloSaida]
+        self,
+        documento: DocumentoNormalizado,
+        instrucao: str,
+        modelo_saida: type[ModeloSaida],
+        *,
+        etapa: str,
     ) -> ModeloSaida:
         partes: list[Any] = [types.Part.from_text(text=instrucao)]
         if documento.texto:
@@ -122,6 +139,7 @@ class GeminiProvider(LLMProvider):
         if len(partes) == 1:
             raise ErroProvedor(CodigoErro.ARQUIVO_INVALIDO, "O documento normalizado está vazio.")
 
+        schema_resposta = _schema_json_gemini(modelo_saida)
         try:
             resposta = self._client.models.generate_content(
                 model=self.modelo,
@@ -129,12 +147,22 @@ class GeminiProvider(LLMProvider):
                 config=types.GenerateContentConfig(
                     system_instruction=INSTRUCAO_SISTEMA,
                     response_mime_type="application/json",
-                    response_json_schema=_schema_json_gemini(modelo_saida),
+                    response_json_schema=schema_resposta,
                     temperature=0,
                     max_output_tokens=4096,
                 ),
             )
         except errors.APIError as exc:
+            logger.exception(
+                "Falha na API Gemini (etapa=%s, modelo=%s). "
+                "Argumentos relevantes: response_mime_type=application/json, temperature=0, "
+                "max_output_tokens=4096, schema=%r. Conteúdo do documento omitido. "
+                "Detalhes completos retornados pela API: %r",
+                etapa,
+                self.modelo,
+                schema_resposta,
+                getattr(exc, "details", None),
+            )
             self._traduzir_erro_api(exc)
         except Exception as exc:
             nome_erro = type(exc).__name__.lower()
