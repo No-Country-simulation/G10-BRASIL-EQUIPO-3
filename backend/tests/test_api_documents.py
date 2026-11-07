@@ -1,6 +1,8 @@
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -160,4 +162,48 @@ def test_upload_txt_integracao_com_langgraph(monkeypatch):
     assert dados["status"] in ("processado", "em_auditoria")
 
     # A persistencia ainda pertence as fases seguintes.
+    assert dados["armazenamento_oci"] is None
+
+
+@pytest.mark.parametrize(
+    ("nome_arquivo", "tipo_arquivo", "mime_type"),
+    [
+        ("mediflow_laudo_teste.pdf", "PDF", "application/pdf"),
+        ("mediflow_laudo_teste.png", "PNG", "image/png"),
+        ("mediflow_laudo_teste.jpg", "JPEG", "image/jpeg"),
+    ],
+)
+def test_upload_formatos_integracao(
+    monkeypatch,
+    nome_arquivo,
+    tipo_arquivo,
+    mime_type,
+):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    caminho = Path(__file__).resolve().parent / "fixtures" / nome_arquivo
+
+    with caminho.open("rb") as arquivo:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": tipo_arquivo,
+                "canal_origem": "AMBULATORIO",
+            },
+            files={
+                "arquivo": (
+                    nome_arquivo,
+                    arquivo,
+                    mime_type,
+                )
+            },
+        )
+
+    assert resposta.status_code == 200, resposta.text
+
+    dados = resposta.json()
+    assert dados["documento_id"].startswith("DOC-")
+    assert dados["origem_analise"]["provedor"] == "mock"
+    assert dados["origem_analise"]["dados_de_teste"] is True
     assert dados["armazenamento_oci"] is None
