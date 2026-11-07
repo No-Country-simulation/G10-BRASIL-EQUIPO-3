@@ -1,8 +1,9 @@
+
 from fastapi import APIRouter, HTTPException
 
-from app.core.config import carregar_configuracao
-from app.ingestion import ErroIngestao, ingerir_documento
 from app.schemas.input import DocumentoRecebido, EntradaTriagem
+from app.schemas.output import RespostaTriagem
+from app.services.triage_service import processar_documento
 
 router = APIRouter(
     prefix="/api/v1/documents",
@@ -10,23 +11,14 @@ router = APIRouter(
 )
 
 
-@router.post("/triage")
+@router.post("/triage", response_model=RespostaTriagem)
 def realizar_triagem(entrada: EntradaTriagem):
     documento = DocumentoRecebido.de_entrada(entrada)
 
     try:
-        ingerir_documento(
-            documento,
-            carregar_configuracao(),
-        )
-    except ErroIngestao as erro:
+        return processar_documento(documento)
+    except Exception as erro:
         raise HTTPException(
-            status_code=422,
-            detail="Não foi possível normalizar o documento.",
+            status_code=500,
+            detail="Erro interno durante o processamento do documento.",
         ) from erro
-
-    # O pipeline LangGraph será integrado posteriormente.
-    raise HTTPException(
-        status_code=501,
-        detail="Pipeline de triagem ainda não integrado.",
-    )

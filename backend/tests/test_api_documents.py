@@ -1,3 +1,6 @@
+
+from unittest.mock import Mock
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -5,7 +8,16 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_entrada_json_valida_sem_pipeline():
+def test_triagem_chama_servico(monkeypatch):
+    servico_simulado = Mock(
+        side_effect=RuntimeError("Teste de chamada ao serviço")
+    )
+
+    monkeypatch.setattr(
+        "app.api.documents.processar_documento",
+        servico_simulado,
+    )
+
     resposta = client.post(
         "/api/v1/documents/triage",
         json={
@@ -15,8 +27,8 @@ def test_entrada_json_valida_sem_pipeline():
         },
     )
 
-    assert resposta.status_code == 501
-    assert "Pipeline" in resposta.json()["detail"]
+    assert resposta.status_code == 500
+    assert servico_simulado.call_count == 1
 
 
 def test_documento_sem_texto():
@@ -28,7 +40,6 @@ def test_documento_sem_texto():
             "canal_origem": "AMBULATORIO",
         },
     )
-
     assert resposta.status_code == 422
 
 
@@ -41,5 +52,4 @@ def test_canal_origem_invalido():
             "canal_origem": "CANAL_INEXISTENTE",
         },
     )
-
     assert resposta.status_code == 422
