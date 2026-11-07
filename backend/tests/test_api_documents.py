@@ -207,3 +207,33 @@ def test_upload_formatos_integracao(
     assert dados["origem_analise"]["provedor"] == "mock"
     assert dados["origem_analise"]["dados_de_teste"] is True
     assert dados["armazenamento_oci"] is None
+
+
+def test_upload_png_corrompido(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    resposta = client.post(
+        "/api/v1/documents/triage/upload",
+        data={
+            "tipo_arquivo": "PNG",
+            "canal_origem": "AMBULATORIO",
+        },
+        files={
+            "arquivo": (
+                "imagem_corrompida.png",
+                b"isto nao e uma imagem PNG valida",
+                "image/png",
+            )
+        },
+    )
+
+    assert resposta.status_code == 200, resposta.text
+
+    dados = resposta.json()
+
+    assert dados["status"] == "erro"
+    assert dados["erro"] is not None
+    assert dados["erro"]["codigo"] == "arquivo_corrompido"
+    assert dados["classificacao"] is None
+    assert dados["decisao_roteamento"] is None
