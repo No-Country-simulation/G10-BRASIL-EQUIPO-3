@@ -1,11 +1,10 @@
-from app.schemas.enums import StatusProcessamento
+from app.core.config import Settings
+from app.schemas.enums import CanalOrigem, StatusProcessamento
+from app.schemas.input import DocumentoRecebido
 from app.schemas.output import RespostaTriagem
+from app.services.triage_service import processar_documento
 from app.storage.mock_storage import MockStorage
 from app.storage.resultados import recuperar_resultado, salvar_resultado
-from app.core.config import Settings
-from app.schemas.enums import CanalOrigem
-from app.schemas.input import DocumentoRecebido
-from app.services.triage_service import processar_documento
 
 
 def criar_resposta_teste() -> RespostaTriagem:
