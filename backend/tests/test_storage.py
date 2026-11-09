@@ -105,3 +105,32 @@ def test_storage_local_verificar_saude(tmp_path):
     storage = MockStorageLocal(tmp_path)
 
     assert storage.verificar_saude() is True
+
+
+@pytest.mark.parametrize("tipo_storage", ["memoria", "local"])
+def test_nao_sobrescrever_documento(tipo_storage, tmp_path):
+    storage = MockStorage() if tipo_storage == "memoria" else MockStorageLocal(tmp_path)
+    chave = "processados/DOC-001/resultado_v001.json"
+
+    storage.salvar(chave, b'{"versao": 1}')
+
+    with pytest.raises(FileExistsError):
+        storage.salvar(chave, b'{"versao": 2}')
+
+    assert storage.ler(chave) == b'{"versao": 1}'
+
+
+@pytest.mark.parametrize("tipo_storage", ["memoria", "local"])
+def test_permite_salvar_versoes_diferentes(tipo_storage, tmp_path):
+    storage = MockStorage() if tipo_storage == "memoria" else MockStorageLocal(tmp_path)
+    storage.salvar(
+        "processados/DOC-001/resultado_v001.json",
+        b'{"versao": 1}',
+    )
+
+    storage.salvar(
+        "processados/DOC-001/resultado_v002.json",
+        b'{"versao": 2}',
+    )
+
+    assert len(storage.listar("processados/DOC-001/")) == 2

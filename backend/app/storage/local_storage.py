@@ -28,7 +28,9 @@ class MockStorageLocal:
     def salvar(self, chave: str, conteudo: bytes) -> None:
         caminho = self._caminho(chave)
         caminho.parent.mkdir(parents=True, exist_ok=True)
-        caminho.write_bytes(conteudo)
+
+        with caminho.open("xb") as arquivo:
+            arquivo.write(conteudo)
 
     def ler(self, chave: str) -> bytes | None:
         caminho = self._caminho(chave)

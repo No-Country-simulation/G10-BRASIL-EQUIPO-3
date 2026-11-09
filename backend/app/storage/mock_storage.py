@@ -8,6 +8,9 @@ class MockStorage:
         if not chave:
             raise ValueError("A chave nao pode estar vazia.")
 
+        if chave in self._objetos:
+            raise FileExistsError(f"Ja existe um objeto armazenado com a chave: {chave}")
+
         self._objetos[chave] = conteudo
 
     def ler(self, chave: str) -> bytes | None:
