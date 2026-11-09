@@ -14,16 +14,31 @@ class MockStorageLocal:
 
         caminho_relativo = Path(chave)
 
-        if caminho_relativo.is_absolute() or ".." in caminho_relativo.parts or "\\" in chave:
+        if (
+            caminho_relativo.is_absolute()
+            or ".." in caminho_relativo.parts
+            or "\\" in chave
+            or ":" in chave
+        ):
             raise ValueError("Chave de armazenamento invalida.")
 
-        caminho = (self.diretorio / caminho_relativo).resolve()
         raiz = self.diretorio.resolve()
+        caminho = raiz / caminho_relativo
 
-        if not caminho.is_relative_to(raiz):
+        atual = raiz
+
+        for parte in caminho_relativo.parts:
+            atual = atual / parte
+
+            if atual.is_symlink():
+                raise ValueError("Links simbolicos nao sao permitidos.")
+
+        caminho_resolvido = caminho.resolve()
+
+        if not caminho_resolvido.is_relative_to(raiz):
             raise ValueError("Chave fora do diretorio permitido.")
 
-        return caminho
+        return caminho_resolvido
 
     def salvar(self, chave: str, conteudo: bytes) -> None:
         caminho = self._caminho(chave)

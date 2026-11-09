@@ -134,3 +134,44 @@ def test_permite_salvar_versoes_diferentes(tipo_storage, tmp_path):
     )
 
     assert len(storage.listar("processados/DOC-001/")) == 2
+
+
+@pytest.mark.parametrize(
+    "chave",
+    [
+        "../segredo.txt",
+        "../../segredo.txt",
+        "/tmp/segredo.txt",
+        r"..\segredo.txt",
+        "",
+    ],
+)
+def test_storage_local_rejeita_caminhos_invalidos(tmp_path, chave):
+    storage = MockStorageLocal(tmp_path)
+
+    with pytest.raises(ValueError):
+        storage.salvar(chave, b"conteudo")
+
+
+def test_storage_local_rejeita_link_simbolico(tmp_path):
+    storage = MockStorageLocal(tmp_path / "storage")
+
+    pasta_externa = tmp_path / "externo"
+    pasta_externa.mkdir()
+
+    link = tmp_path / "storage" / "atalho"
+
+    try:
+        link.symlink_to(
+            pasta_externa,
+            target_is_directory=True,
+        )
+    except OSError as erro:
+        if getattr(erro, "winerror", None) == 1314:
+            pytest.skip("Windows sem permissao para criar links simbolicos")
+        raise
+
+    with pytest.raises(ValueError):
+        storage.salvar("atalho/documento.txt", b"conteudo")
+
+    assert not (pasta_externa / "documento.txt").exists()
