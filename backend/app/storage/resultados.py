@@ -95,3 +95,36 @@ def recuperar_resultado_mais_recente(
         raise ValueError("Chave e resultado armazenado inconsistentes.")
 
     return resultado
+
+
+def listar_resultados_recentes(
+    storage: StorageBackend,
+) -> list[RespostaTriagem]:
+    """Lista apenas a versao mais recente de cada documento."""
+
+    ids_documentos: set[str] = set()
+
+    padrao = re.compile(
+        r"^(?:recebidos|processados|auditoria_humana|"
+        r"rejeitados|falhas_processamento)/"
+        r"([A-Za-z0-9_-]+)/resultado_v[0-9]{3,}\.json$"
+    )
+
+    for chave in storage.listar():
+        correspondencia = padrao.fullmatch(chave)
+
+        if correspondencia:
+            ids_documentos.add(correspondencia.group(1))
+
+    resultados = []
+
+    for documento_id in sorted(ids_documentos):
+        resultado = recuperar_resultado_mais_recente(
+            storage,
+            documento_id,
+        )
+
+        if resultado is not None:
+            resultados.append(resultado)
+
+    return resultados

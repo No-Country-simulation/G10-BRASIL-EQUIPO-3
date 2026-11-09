@@ -5,6 +5,7 @@ from app.schemas.output import RespostaTriagem
 from app.services.triage_service import processar_documento
 from app.storage.mock_storage import MockStorage
 from app.storage.resultados import (
+    listar_resultados_recentes,
     recuperar_resultado,
     recuperar_resultado_mais_recente,
     salvar_resultado,
@@ -122,3 +123,36 @@ def test_recuperar_apenas_documento_solicitado():
     assert recuperado is not None
     assert recuperado.documento_id == "DOC-001"
     assert recuperado.versao_resultado == 1
+
+
+def test_listar_resultados_mais_recentes():
+    storage = MockStorage()
+
+    for documento_id, versao in [
+        ("DOC-001", 1),
+        ("DOC-001", 2),
+        ("DOC-002", 1),
+    ]:
+        resposta = RespostaTriagem(
+            documento_id=documento_id,
+            status=StatusProcessamento.RECEBIDO,
+            versao_resultado=versao,
+        )
+        salvar_resultado(storage, resposta)
+
+    resultados = listar_resultados_recentes(storage)
+
+    assert len(resultados) == 2
+
+    por_id = {resultado.documento_id: resultado for resultado in resultados}
+
+    assert por_id["DOC-001"].versao_resultado == 2
+    assert por_id["DOC-002"].versao_resultado == 1
+
+
+def test_listar_resultados_vazio():
+    storage = MockStorage()
+
+    resultados = listar_resultados_recentes(storage)
+
+    assert resultados == []

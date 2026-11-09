@@ -317,3 +317,13 @@ def test_upload_txt_persiste_e_permite_consulta(monkeypatch):
     assert dados_get["documento_id"] == documento_id
     assert dados_get["status"] == dados_post["status"]
     assert dados_get["versao_resultado"] == dados_post["versao_resultado"]
+
+
+def test_listar_documentos_pela_api():
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta = client.get("/api/v1/documents")
+
+    assert resposta.status_code == 200
+    assert resposta.json() == []

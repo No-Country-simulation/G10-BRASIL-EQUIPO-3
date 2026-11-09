@@ -16,6 +16,7 @@ from app.services.triage_service import processar_documento
 from app.storage.base import StorageBackend
 from app.storage.dependencies import obter_storage
 from app.storage.resultados import (
+    listar_resultados_recentes,
     recuperar_resultado_mais_recente,
     salvar_resultado,
 )
@@ -133,6 +134,24 @@ async def realizar_triagem_upload(
         ) from erro
 
     return resposta
+
+
+@router.get("", response_model=list[RespostaTriagem])
+def listar_documentos(
+    storage: Annotated[StorageBackend, Depends(obter_storage)],
+):
+    try:
+        return listar_resultados_recentes(storage)
+    except OSError as erro:
+        raise HTTPException(
+            status_code=503,
+            detail="Servico de armazenamento indisponivel.",
+        ) from erro
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro interno ao listar documentos.",
+        ) from erro
 
 
 @router.get("/{documento_id}", response_model=RespostaTriagem)
