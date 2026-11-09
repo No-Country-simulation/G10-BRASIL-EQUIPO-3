@@ -1,5 +1,6 @@
 import pytest
 
+from app.storage.local_storage import MockStorageLocal
 from app.storage.mock_storage import MockStorage
 
 
@@ -47,5 +48,60 @@ def test_chave_vazia():
 
 def test_verificar_saude():
     storage = MockStorage()
+
+    assert storage.verificar_saude() is True
+
+
+def test_storage_local_salvar_e_ler(tmp_path):
+    storage = MockStorageLocal(tmp_path)
+
+    storage.salvar(
+        "recebidos/DOC-001/original.txt",
+        b"Documento ficticio",
+    )
+
+    resultado = storage.ler("recebidos/DOC-001/original.txt")
+
+    assert resultado == b"Documento ficticio"
+
+
+def test_storage_local_persiste_entre_instancias(tmp_path):
+    primeiro = MockStorageLocal(tmp_path)
+
+    primeiro.salvar(
+        "recebidos/DOC-002/original.txt",
+        b"Documento persistido",
+    )
+
+    segundo = MockStorageLocal(tmp_path)
+
+    resultado = segundo.ler("recebidos/DOC-002/original.txt")
+
+    assert resultado == b"Documento persistido"
+
+
+def test_storage_local_listar(tmp_path):
+    storage = MockStorageLocal(tmp_path)
+
+    storage.salvar("recebidos/DOC-001.txt", b"Um")
+    storage.salvar("recebidos/DOC-002.txt", b"Dois")
+    storage.salvar("processados/DOC-003.json", b"{}")
+
+    resultado = storage.listar("recebidos/")
+
+    assert len(resultado) == 2
+
+
+def test_storage_local_bloqueia_caminho_invalido(tmp_path):
+    import pytest
+
+    storage = MockStorageLocal(tmp_path)
+
+    with pytest.raises(ValueError):
+        storage.salvar("../fora.txt", b"conteudo")
+
+
+def test_storage_local_verificar_saude(tmp_path):
+    storage = MockStorageLocal(tmp_path)
 
     assert storage.verificar_saude() is True
