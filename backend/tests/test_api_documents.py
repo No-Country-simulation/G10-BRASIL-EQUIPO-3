@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, criar_app
 from app.schemas.input import DocumentoRecebido
 
 client = TestClient(app)
@@ -237,3 +237,83 @@ def test_upload_png_corrompido(monkeypatch):
     assert dados["erro"]["codigo"] == "arquivo_corrompido"
     assert dados["classificacao"] is None
     assert dados["decisao_roteamento"] is None
+
+
+def test_triagem_json_persiste_e_permite_consulta(monkeypatch):
+    from app.schemas.enums import CanalOrigem, StatusProcessamento
+    from app.schemas.output import RespostaTriagem
+
+    app = criar_app()
+
+    def processar_simulado(documento):
+        return RespostaTriagem(
+            documento_id=documento.documento_id,
+            status=StatusProcessamento.RECEBIDO,
+            versao_resultado=1,
+        )
+
+    monkeypatch.setattr(
+        "app.api.documents.processar_documento",
+        processar_simulado,
+    )
+
+    with TestClient(app) as client:
+        # Vamos usar o contrato real do endpoint no teste.
+        resposta_post = client.post(
+            "/api/v1/documents/triage",
+            json={
+                "documento_id": "DOC-INTEGRACAO-001",
+                "tipo_arquivo": "TXT",
+                "canal_origem": CanalOrigem.OUTRO.value,
+                "documento_texto": "Documento ficticio de teste.",
+            },
+        )
+
+        assert resposta_post.status_code == 200
+
+        documento_id = resposta_post.json()["documento_id"]
+
+        resposta_get = client.get(f"/api/v1/documents/{documento_id}")
+
+    assert resposta_get.status_code == 200
+    assert resposta_get.json()["documento_id"] == documento_id
+    assert resposta_get.json()["versao_resultado"] == 1
+
+
+def test_upload_txt_persiste_e_permite_consulta(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta_post = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-UPLOAD-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio para teste.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_post.status_code == 200
+
+        dados_post = resposta_post.json()
+        documento_id = dados_post["documento_id"]
+
+        resposta_get = client.get(f"/api/v1/documents/{documento_id}")
+
+    assert resposta_get.status_code == 200
+
+    dados_get = resposta_get.json()
+
+    assert dados_get["documento_id"] == documento_id
+    assert dados_get["status"] == dados_post["status"]
+    assert dados_get["versao_resultado"] == dados_post["versao_resultado"]
