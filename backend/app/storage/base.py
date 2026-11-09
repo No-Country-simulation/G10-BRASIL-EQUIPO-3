@@ -1,0 +1,13 @@
+from typing import Protocol
+
+
+class StorageBackend(Protocol):
+    """Contrato basico para armazenamento de objetos."""
+
+    def salvar(self, chave: str, conteudo: bytes) -> None: ...
+
+    def ler(self, chave: str) -> bytes | None: ...
+
+    def listar(self, prefixo: str = "") -> list[str]: ...
+
+    def verificar_saude(self) -> bool: ...
