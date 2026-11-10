@@ -1,4 +1,5 @@
 from pathlib import Path
+from threading import Lock
 
 from fastapi import FastAPI
 
@@ -20,6 +21,7 @@ def criar_app() -> FastAPI:
     )
 
     app.state.settings = settings
+    app.state.revisao_lock = Lock()
     if settings.storage_backend == "mock":
         app.state.storage = MockStorage()
 

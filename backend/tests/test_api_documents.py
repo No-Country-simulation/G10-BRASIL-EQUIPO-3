@@ -973,3 +973,91 @@ def test_upload_rejeita_documento_id_invalido(
 
     assert resposta.status_code == 422
     assert app.state.storage.listar() == []
+
+
+def test_revisoes_simultaneas_nao_criam_versoes_conflitantes(
+    monkeypatch,
+):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    import app.api.documents as modulo_documents
+
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+    revisao_iniciada = Event()
+    liberar_revisao = Event()
+
+    registrar_original = modulo_documents.registrar_revisao
+
+    def registrar_controlado(resposta, requisicao):
+        revisao_iniciada.set()
+
+        if not liberar_revisao.wait(timeout=5):
+            raise RuntimeError("Tempo excedido no teste.")
+
+        return registrar_original(resposta, requisicao)
+
+    monkeypatch.setattr(
+        modulo_documents,
+        "registrar_revisao",
+        registrar_controlado,
+    )
+
+    documento_id = "DOC-CONCORRENCIA-001"
+
+    with TestClient(app) as client:
+        triagem = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": documento_id,
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento ficticio para concorrencia.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert triagem.status_code == 200
+        versao = triagem.json()["versao_resultado"]
+
+        def enviar_revisao(decisao):
+            return client.post(
+                f"/api/v1/documents/{documento_id}/review",
+                json={
+                    "decisao": decisao,
+                    "justificativa": "Revisao de teste.",
+                    "correcoes": [],
+                    "revisor": "Revisor de teste",
+                    "versao_resultado_base": versao,
+                },
+            )
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            primeira = executor.submit(enviar_revisao, "aprovar")
+
+            try:
+                assert revisao_iniciada.wait(timeout=5)
+
+                segunda = executor.submit(enviar_revisao, "rejeitar")
+            finally:
+                liberar_revisao.set()
+
+            resposta_a = primeira.result()
+            resposta_b = segunda.result()
+
+        assert resposta_a.status_code == 200
+        assert resposta_b.status_code == 409
+
+        consulta = client.get(f"/api/v1/documents/{documento_id}")
+
+        assert consulta.status_code == 200
+        assert consulta.json()["versao_resultado"] == versao + 1
+        assert len(consulta.json()["historico_revisao"]) == 1

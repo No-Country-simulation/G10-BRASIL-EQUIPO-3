@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
@@ -217,14 +217,10 @@ def consultar_documento(
     return resultado
 
 
-@router.post(
-    "/{documento_id}/review",
-    response_model=RespostaTriagem,
-)
-def revisar_documento(
+def _executar_revisao_documento(
     documento_id: str,
     requisicao: RequisicaoRevisao,
-    storage: Annotated[StorageBackend, Depends(obter_storage)],
+    storage: StorageBackend,
 ):
     try:
         resultado_atual = recuperar_resultado_mais_recente(
@@ -284,3 +280,21 @@ def revisar_documento(
         ) from erro
 
     return resultado_revisado
+
+
+@router.post(
+    "/{documento_id}/review",
+    response_model=RespostaTriagem,
+)
+def revisar_documento(
+    documento_id: str,
+    requisicao: RequisicaoRevisao,
+    storage: Annotated[StorageBackend, Depends(obter_storage)],
+    request: Request,
+):
+    with request.app.state.revisao_lock:
+        return _executar_revisao_documento(
+            documento_id,
+            requisicao,
+            storage,
+        )
