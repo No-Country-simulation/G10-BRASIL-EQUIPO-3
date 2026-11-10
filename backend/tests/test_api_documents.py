@@ -856,3 +856,42 @@ def test_api_com_storage_local_persiste_entre_instancias(
     conteudo_salvo = app_segunda.state.storage.ler(f"recebidos/{documento_id}/original.txt")
 
     assert conteudo_salvo == conteudo_original
+
+
+def test_criar_app_seleciona_storage_local(monkeypatch, tmp_path):
+    from app.storage.local_storage import MockStorageLocal
+
+    diretorio = tmp_path / "storage_local"
+
+    monkeypatch.setenv("STORAGE_BACKEND", "local")
+    monkeypatch.setenv("STORAGE_LOCAL_DIR", str(diretorio))
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+
+    app = criar_app()
+
+    assert isinstance(app.state.storage, MockStorageLocal)
+    assert app.state.storage.diretorio == diretorio
+    assert diretorio.is_dir()
+
+
+def test_criar_app_seleciona_storage_mock(monkeypatch):
+    from app.storage.mock_storage import MockStorage
+
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    assert isinstance(app.state.storage, MockStorage)
+
+
+def test_criar_app_nao_substitui_oci_por_mock(monkeypatch):
+    monkeypatch.setenv("STORAGE_BACKEND", "oci")
+    monkeypatch.setenv("OCI_NAMESPACE", "namespace-teste")
+    monkeypatch.setenv("OCI_REGION", "regiao-teste")
+    monkeypatch.setenv("OCI_BUCKET", "bucket-teste")
+
+    with pytest.raises(
+        RuntimeError,
+        match="OCI ainda nao esta integrado",
+    ):
+        criar_app()

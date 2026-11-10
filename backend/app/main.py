@@ -1,9 +1,12 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 
 from app.api.documents import router as documents_router
 from app.api.health import router as health_router
 from app.api.ready import router as ready_router
 from app.core.config import carregar_configuracao
+from app.storage.local_storage import MockStorageLocal
 from app.storage.mock_storage import MockStorage
 
 
@@ -17,7 +20,14 @@ def criar_app() -> FastAPI:
     )
 
     app.state.settings = settings
-    app.state.storage = MockStorage()
+    if settings.storage_backend == "mock":
+        app.state.storage = MockStorage()
+
+    elif settings.storage_backend == "local":
+        app.state.storage = MockStorageLocal(Path(settings.storage_local_dir))
+
+    else:
+        raise RuntimeError("O armazenamento OCI ainda nao esta integrado ao FastAPI.")
 
     app.include_router(health_router)
     app.include_router(documents_router)
