@@ -17,6 +17,7 @@ from app.services.review_service import registrar_revisao
 from app.services.triage_service import processar_documento
 from app.storage.base import StorageBackend
 from app.storage.dependencies import obter_storage
+from app.storage.keys import chave_documento
 from app.storage.resultados import (
     listar_resultados_recentes,
     recuperar_resultado_mais_recente,
@@ -99,6 +100,36 @@ async def realizar_triagem_upload(
         raise HTTPException(
             status_code=422,
             detail="Os dados do documento sao invalidos.",
+        ) from erro
+
+    try:
+        chave_original = chave_documento(
+            documento.documento_id,
+            documento.tipo_arquivo.value,
+        )
+
+        await run_in_threadpool(
+            storage.salvar,
+            chave_original,
+            conteudo,
+        )
+
+    except FileExistsError as erro:
+        raise HTTPException(
+            status_code=409,
+            detail="O documento original ja foi armazenado.",
+        ) from erro
+
+    except OSError as erro:
+        raise HTTPException(
+            status_code=503,
+            detail="Servico de armazenamento indisponivel.",
+        ) from erro
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=422,
+            detail="Tipo de arquivo invalido para armazenamento.",
         ) from erro
 
     try:

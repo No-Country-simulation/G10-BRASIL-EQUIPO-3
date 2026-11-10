@@ -590,3 +590,71 @@ def test_documento_aprovado_nao_pode_ser_revisado_novamente(monkeypatch):
 
         assert consulta.status_code == 200
         assert consulta.json()["versao_resultado"] == primeira.json()["versao_resultado"]
+
+
+def test_upload_armazena_arquivo_original(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    conteudo_original = b"Documento clinico ficticio para armazenamento."
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-ORIGINAL-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    conteudo_original,
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta.status_code == 200
+
+        storage = app.state.storage
+
+        conteudo_salvo = storage.ler("recebidos/DOC-ORIGINAL-001/original.txt")
+
+        assert conteudo_salvo == conteudo_original
+
+
+def test_upload_duplicado_nao_sobrescreve_original(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    def enviar_upload(conteudo):
+        return client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-DUPLICADO-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    conteudo,
+                    "text/plain",
+                ),
+            },
+        )
+
+    with TestClient(app) as client:
+        primeiro = enviar_upload(b"Primeiro documento ficticio.")
+        segundo = enviar_upload(b"Segundo documento ficticio.")
+
+        conteudo_salvo = app.state.storage.ler("recebidos/DOC-DUPLICADO-001/original.txt")
+
+    assert primeiro.status_code == 200
+    assert segundo.status_code == 409
+    assert conteudo_salvo == b"Primeiro documento ficticio."
