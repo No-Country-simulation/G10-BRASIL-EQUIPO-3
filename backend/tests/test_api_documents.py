@@ -746,3 +746,54 @@ def test_upload_falha_ao_salvar_resultado_retorna_503(monkeypatch):
 
         assert original == b"Documento clinico ficticio para teste."
         assert resultados == []
+
+
+@pytest.mark.parametrize(
+    ("nome_arquivo", "tipo_arquivo", "mime_type", "extensao"),
+    [
+        ("mediflow_laudo_teste.pdf", "PDF", "application/pdf", "pdf"),
+        ("mediflow_laudo_teste.png", "PNG", "image/png", "png"),
+        ("mediflow_laudo_teste.jpg", "JPEG", "image/jpeg", "jpeg"),
+    ],
+)
+def test_upload_formatos_persistem_originais(
+    monkeypatch,
+    nome_arquivo,
+    tipo_arquivo,
+    mime_type,
+    extensao,
+):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    caminho = Path(__file__).parent / "fixtures" / nome_arquivo
+    conteudo_original = caminho.read_bytes()
+
+    documento_id = f"DOC-ORIGINAL-{tipo_arquivo}"
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": tipo_arquivo,
+                "canal_origem": "AMBULATORIO",
+                "documento_id": documento_id,
+            },
+            files={
+                "arquivo": (
+                    nome_arquivo,
+                    conteudo_original,
+                    mime_type,
+                ),
+            },
+        )
+
+        assert resposta.status_code == 200, resposta.text
+
+        chave = f"recebidos/{documento_id}/original.{extensao}"
+
+        conteudo_salvo = app.state.storage.ler(chave)
+
+        assert conteudo_salvo == conteudo_original
