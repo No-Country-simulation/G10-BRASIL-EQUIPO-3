@@ -175,3 +175,24 @@ def test_storage_local_rejeita_link_simbolico(tmp_path):
         storage.salvar("atalho/documento.txt", b"conteudo")
 
     assert not (pasta_externa / "documento.txt").exists()
+
+
+def test_storage_local_persiste_apos_nova_instancia(tmp_path):
+    from app.storage.local_storage import MockStorageLocal
+
+    pasta = tmp_path / "documentos"
+
+    primeiro_storage = MockStorageLocal(pasta)
+
+    chave = "recebidos/DOC-PERSISTENCIA-001/original.txt"
+    conteudo = b"Documento ficticio persistido em disco."
+
+    primeiro_storage.salvar(chave, conteudo)
+
+    # Simula outra instancia acessando o mesmo diretorio.
+    segundo_storage = MockStorageLocal(pasta)
+
+    conteudo_recuperado = segundo_storage.ler(chave)
+
+    assert conteudo_recuperado == conteudo
+    assert chave in segundo_storage.listar()
