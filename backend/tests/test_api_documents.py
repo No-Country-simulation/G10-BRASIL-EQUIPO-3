@@ -658,3 +658,91 @@ def test_upload_duplicado_nao_sobrescreve_original(monkeypatch):
     assert primeiro.status_code == 200
     assert segundo.status_code == 409
     assert conteudo_salvo == b"Primeiro documento ficticio."
+
+
+def test_upload_falha_armazenamento_retorna_503(monkeypatch):
+    from app.storage.fault_storage import MockStorageComFalha
+
+    app = criar_app()
+
+    # Simula falha em qualquer tentativa de gravacao.
+    app.state.storage = MockStorageComFalha(falha_em="salvar")
+
+    processamento_executado = False
+
+    def processar_simulado(*args, **kwargs):
+        nonlocal processamento_executado
+        processamento_executado = True
+        raise AssertionError("O processamento nao deveria ser executado.")
+
+    monkeypatch.setattr(
+        "app.api.documents.processar_documento",
+        processar_simulado,
+    )
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-FALHA-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento ficticio para teste de falha.",
+                    "text/plain",
+                ),
+            },
+        )
+
+    assert resposta.status_code == 503
+    assert processamento_executado is False
+    assert app.state.storage.listar() == []
+
+
+def test_upload_falha_ao_salvar_resultado_retorna_503(monkeypatch):
+    from app.storage.mock_storage import MockStorage
+
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    class StorageFalhaResultado(MockStorage):
+        def salvar(self, chave: str, conteudo: bytes) -> None:
+            if chave.endswith(".json"):
+                raise OSError("Falha simulada ao salvar resultado.")
+
+            super().salvar(chave, conteudo)
+
+    app.state.storage = StorageFalhaResultado()
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-FALHA-RESULTADO-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio para teste.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta.status_code == 503
+
+        storage = app.state.storage
+
+        original = storage.ler("recebidos/DOC-FALHA-RESULTADO-001/original.txt")
+
+        resultados = [chave for chave in storage.listar() if chave.endswith(".json")]
+
+        assert original == b"Documento clinico ficticio para teste."
+        assert resultados == []
