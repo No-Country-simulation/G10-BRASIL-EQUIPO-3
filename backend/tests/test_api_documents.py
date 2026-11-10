@@ -895,3 +895,45 @@ def test_criar_app_nao_substitui_oci_por_mock(monkeypatch):
         match="OCI ainda nao esta integrado",
     ):
         criar_app()
+
+
+def test_documento_com_ponto_no_id_pode_ser_consultado_e_listado(
+    monkeypatch,
+):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+    documento_id = "DOC.001"
+
+    with TestClient(app) as client:
+        resposta_upload = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": documento_id,
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento ficticio para testar o identificador.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_upload.status_code == 200
+
+        resposta_consulta = client.get(f"/api/v1/documents/{documento_id}")
+
+        assert resposta_consulta.status_code == 200
+        assert resposta_consulta.json()["documento_id"] == documento_id
+
+        resposta_listagem = client.get("/api/v1/documents")
+
+        assert resposta_listagem.status_code == 200
+
+        ids_listados = [documento["documento_id"] for documento in resposta_listagem.json()]
+
+        assert documento_id in ids_listados

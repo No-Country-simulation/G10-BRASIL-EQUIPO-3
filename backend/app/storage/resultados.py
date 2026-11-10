@@ -1,5 +1,6 @@
 import re
 
+from app.schemas.input import PADRAO_DOCUMENTO_ID
 from app.schemas.output import RespostaTriagem
 from app.storage.base import StorageBackend
 from app.storage.keys import chave_resultado
@@ -44,7 +45,7 @@ def recuperar_resultado_mais_recente(
 ) -> RespostaTriagem | None:
     """Recupera a versao mais recente de um documento."""
 
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", documento_id):
+    if not re.fullmatch(PADRAO_DOCUMENTO_ID, documento_id):
         raise ValueError("Identificador de documento invalido.")
 
     padrao = re.compile(
@@ -107,9 +108,9 @@ def listar_resultados_recentes(
     padrao = re.compile(
         r"^(?:recebidos|processados|auditoria_humana|"
         r"rejeitados|falhas_processamento)/"
-        r"([A-Za-z0-9_-]+)/resultado_v[0-9]{3,}\.json$"
+        r"([A-Za-z0-9][A-Za-z0-9._-]{0,63})/"
+        r"resultado_v[0-9]{3,}\.json$"
     )
-
     for chave in storage.listar():
         correspondencia = padrao.fullmatch(chave)
 
