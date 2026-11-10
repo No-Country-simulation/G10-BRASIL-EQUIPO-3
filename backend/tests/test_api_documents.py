@@ -797,3 +797,62 @@ def test_upload_formatos_persistem_originais(
         conteudo_salvo = app.state.storage.ler(chave)
 
         assert conteudo_salvo == conteudo_original
+
+
+def test_api_com_storage_local_persiste_entre_instancias(
+    monkeypatch,
+    tmp_path,
+):
+    from app.storage.local_storage import MockStorageLocal
+
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    diretorio = tmp_path / "documentos"
+    documento_id = "DOC-LOCAL-API-001"
+    conteudo_original = b"Documento clinico ficticio para teste local."
+
+    # Primeira instancia da aplicacao.
+    app_primeira = criar_app()
+    app_primeira.state.storage = MockStorageLocal(diretorio)
+
+    with TestClient(app_primeira) as client:
+        resposta_upload = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": documento_id,
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    conteudo_original,
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_upload.status_code == 200, resposta_upload.text
+
+        dados_iniciais = resposta_upload.json()
+
+    # Outra instancia da aplicacao usando a mesma pasta.
+    app_segunda = criar_app()
+    app_segunda.state.storage = MockStorageLocal(diretorio)
+
+    with TestClient(app_segunda) as client:
+        resposta_consulta = client.get(f"/api/v1/documents/{documento_id}")
+
+        assert resposta_consulta.status_code == 200
+
+        dados_recuperados = resposta_consulta.json()
+
+    assert dados_recuperados["documento_id"] == documento_id
+    assert dados_recuperados["status"] == dados_iniciais["status"]
+    assert dados_recuperados["versao_resultado"] == (dados_iniciais["versao_resultado"])
+
+    # Verifica os bytes do arquivo original.
+    conteudo_salvo = app_segunda.state.storage.ler(f"recebidos/{documento_id}/original.txt")
+
+    assert conteudo_salvo == conteudo_original
