@@ -937,3 +937,39 @@ def test_documento_com_ponto_no_id_pode_ser_consultado_e_listado(
         ids_listados = [documento["documento_id"] for documento in resposta_listagem.json()]
 
         assert documento_id in ids_listados
+
+
+@pytest.mark.parametrize(
+    "documento_id",
+    [
+        "../documento",
+        "DOC/001",
+        r"DOC\001",
+        ".",
+        "..",
+    ],
+)
+def test_upload_rejeita_documento_id_invalido(
+    documento_id,
+):
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": documento_id,
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento ficticio para validar ID.",
+                    "text/plain",
+                ),
+            },
+        )
+
+    assert resposta.status_code == 422
+    assert app.state.storage.listar() == []
