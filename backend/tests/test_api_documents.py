@@ -327,3 +327,266 @@ def test_listar_documentos_pela_api():
 
     assert resposta.status_code == 200
     assert resposta.json() == []
+
+
+def test_revisar_documento_inexistente():
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/DOC-INEXISTENTE/review",
+            json={
+                "decisao": "aprovar",
+                "justificativa": "Revisao de teste.",
+                "correcoes": [],
+                "revisor": "Revisor de teste",
+                "versao_resultado_base": 1,
+            },
+        )
+
+    assert resposta.status_code == 404
+    assert resposta.json()["detail"] == "Documento nao encontrado."
+
+
+def test_aprovar_documento_cria_nova_versao(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta_triagem = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-REVISAO-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio, sem dados reais.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_triagem.status_code == 200
+
+        dados_iniciais = resposta_triagem.json()
+        assert dados_iniciais["status"] == "em_auditoria"
+
+        resposta_revisao = client.post(
+            "/api/v1/documents/DOC-REVISAO-001/review",
+            json={
+                "decisao": "aprovar",
+                "justificativa": "Documento conferido.",
+                "correcoes": [],
+                "revisor": "Revisor de teste",
+                "versao_resultado_base": dados_iniciais["versao_resultado"],
+            },
+        )
+
+        assert resposta_revisao.status_code == 200
+
+        dados_revisados = resposta_revisao.json()
+
+        assert dados_revisados["versao_resultado"] == (dados_iniciais["versao_resultado"] + 1)
+        assert len(dados_revisados["historico_revisao"]) == 1
+
+        resposta_consulta = client.get("/api/v1/documents/DOC-REVISAO-001")
+
+        assert resposta_consulta.status_code == 200
+        assert resposta_consulta.json()["versao_resultado"] == 2
+
+
+def test_revisao_com_versao_desatualizada(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta_triagem = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-CONFLITO-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio para teste.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_triagem.status_code == 200
+
+        versao_inicial = resposta_triagem.json()["versao_resultado"]
+
+        revisao = {
+            "decisao": "aprovar",
+            "justificativa": "Documento conferido.",
+            "correcoes": [],
+            "revisor": "Revisor de teste",
+            "versao_resultado_base": versao_inicial,
+        }
+
+        primeira_revisao = client.post(
+            "/api/v1/documents/DOC-CONFLITO-001/review",
+            json=revisao,
+        )
+
+        assert primeira_revisao.status_code == 200
+
+        segunda_revisao = client.post(
+            "/api/v1/documents/DOC-CONFLITO-001/review",
+            json=revisao,
+        )
+
+        assert segunda_revisao.status_code == 409
+
+        consulta = client.get("/api/v1/documents/DOC-CONFLITO-001")
+
+        assert consulta.status_code == 200
+        assert consulta.json()["versao_resultado"] == (versao_inicial + 1)
+
+
+def test_rejeitar_documento_cria_nova_versao(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta_triagem = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-REJEICAO-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio, sem dados reais.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert resposta_triagem.status_code == 200
+
+        dados_iniciais = resposta_triagem.json()
+        assert dados_iniciais["status"] == "em_auditoria"
+
+        resposta_revisao = client.post(
+            "/api/v1/documents/DOC-REJEICAO-001/review",
+            json={
+                "decisao": "rejeitar",
+                "justificativa": "Documento incompleto para processamento.",
+                "correcoes": [],
+                "revisor": "Revisor de teste",
+                "versao_resultado_base": dados_iniciais["versao_resultado"],
+            },
+        )
+
+        assert resposta_revisao.status_code == 200
+
+        dados_revisados = resposta_revisao.json()
+
+        assert dados_revisados["status"] == "rejeitado"
+        assert dados_revisados["versao_resultado"] == (dados_iniciais["versao_resultado"] + 1)
+
+        assert len(dados_revisados["historico_revisao"]) == 1
+
+        registro = dados_revisados["historico_revisao"][0]
+
+        assert registro["decisao"] == "rejeitar"
+        assert registro["justificativa"] == ("Documento incompleto para processamento.")
+
+        resposta_consulta = client.get("/api/v1/documents/DOC-REJEICAO-001")
+
+        assert resposta_consulta.status_code == 200
+        assert resposta_consulta.json()["status"] == "rejeitado"
+        assert resposta_consulta.json()["versao_resultado"] == (
+            dados_iniciais["versao_resultado"] + 1
+        )
+
+
+def test_rejeicao_sem_justificativa_retorna_422():
+    app = criar_app()
+
+    with TestClient(app) as client:
+        resposta = client.post(
+            "/api/v1/documents/DOC-TESTE-001/review",
+            json={
+                "decisao": "rejeitar",
+                "correcoes": [],
+                "revisor": "Revisor de teste",
+                "versao_resultado_base": 1,
+            },
+        )
+
+    assert resposta.status_code == 422
+
+
+def test_documento_aprovado_nao_pode_ser_revisado_novamente(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("STORAGE_BACKEND", "mock")
+
+    app = criar_app()
+
+    with TestClient(app) as client:
+        triagem = client.post(
+            "/api/v1/documents/triage/upload",
+            data={
+                "tipo_arquivo": "TXT",
+                "canal_origem": "OUTRO",
+                "documento_id": "DOC-ESTADO-FINAL-001",
+            },
+            files={
+                "arquivo": (
+                    "documento_ficticio.txt",
+                    b"Documento clinico ficticio para teste.",
+                    "text/plain",
+                ),
+            },
+        )
+
+        assert triagem.status_code == 200
+
+        revisao = {
+            "decisao": "aprovar",
+            "justificativa": "Documento conferido.",
+            "correcoes": [],
+            "revisor": "Revisor de teste",
+            "versao_resultado_base": triagem.json()["versao_resultado"],
+        }
+
+        primeira = client.post(
+            "/api/v1/documents/DOC-ESTADO-FINAL-001/review",
+            json=revisao,
+        )
+
+        assert primeira.status_code == 200
+        assert primeira.json()["status"] == "aprovado_auditoria"
+
+        # Utiliza a versao atual para testar a regra de estado final,
+        # e nao apenas o conflito de versoes.
+        revisao["versao_resultado_base"] = primeira.json()["versao_resultado"]
+
+        segunda = client.post(
+            "/api/v1/documents/DOC-ESTADO-FINAL-001/review",
+            json=revisao,
+        )
+
+        assert segunda.status_code == 409
+
+        consulta = client.get("/api/v1/documents/DOC-ESTADO-FINAL-001")
+
+        assert consulta.status_code == 200
+        assert consulta.json()["versao_resultado"] == primeira.json()["versao_resultado"]

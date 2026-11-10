@@ -12,6 +12,8 @@ from app.schemas.input import (
     gerar_documento_id,
 )
 from app.schemas.output import RespostaTriagem
+from app.schemas.review import RequisicaoRevisao
+from app.services.review_service import registrar_revisao
 from app.services.triage_service import processar_documento
 from app.storage.base import StorageBackend
 from app.storage.dependencies import obter_storage
@@ -182,3 +184,72 @@ def consultar_documento(
         )
 
     return resultado
+
+
+@router.post(
+    "/{documento_id}/review",
+    response_model=RespostaTriagem,
+)
+def revisar_documento(
+    documento_id: str,
+    requisicao: RequisicaoRevisao,
+    storage: Annotated[StorageBackend, Depends(obter_storage)],
+):
+    try:
+        resultado_atual = recuperar_resultado_mais_recente(
+            storage,
+            documento_id,
+        )
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro de consistencia no armazenamento.",
+        ) from erro
+    except OSError as erro:
+        raise HTTPException(
+            status_code=503,
+            detail="Servico de armazenamento indisponivel.",
+        ) from erro
+
+    if resultado_atual is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Documento nao encontrado.",
+        )
+
+    if requisicao.versao_resultado_base != resultado_atual.versao_resultado:
+        raise HTTPException(
+            status_code=409,
+            detail="Versao desatualizada. Consulte o documento novamente.",
+        )
+
+    try:
+        resultado_revisado = registrar_revisao(
+            resultado_atual,
+            requisicao,
+        )
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=409,
+            detail="Revisao nao permitida para o estado ou dados atuais.",
+        ) from erro
+
+    try:
+        salvar_resultado(storage, resultado_revisado)
+    except FileExistsError as erro:
+        raise HTTPException(
+            status_code=409,
+            detail="Ja existe um resultado com essa versao.",
+        ) from erro
+    except OSError as erro:
+        raise HTTPException(
+            status_code=503,
+            detail="Servico de armazenamento indisponivel.",
+        ) from erro
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro interno ao armazenar a revisao.",
+        ) from erro
+
+    return resultado_revisado
