@@ -1,1 +1,6 @@
-import type {Status} from '../types'; const labels:Record<Status,string>={processando:'Processando',pendente:'Pendente',revisao:'Em revisão',concluido:'Concluído',erro:'Erro'}; export function StatusBadge({status}:{status:Status}){return <span className={`badge ${status}`}>{labels[status]}</span>}
+import type {DocumentoView} from '../types/view';
+
+/** Status de processamento do backend (`StatusProcessamento`); o texto é só apresentação. */
+export function StatusBadge({doc}: {doc: Pick<DocumentoView, 'status' | 'statusRotulo'>}) {
+  return <span className={`badge ${doc.status}`}>{doc.statusRotulo}</span>;
+}

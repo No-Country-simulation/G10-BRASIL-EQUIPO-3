@@ -1,18 +1,11 @@
 # MediFlow — Frontend React
 
-Frontend do MVP MediFlow baseado no protótipos do Figma. 
+Frontend do MVP MediFlow (Equipo 03).
 
-## Rodar
+## Executar
 ```bash
 npm install
-cp .env.example .env
-npm run dev
+cp .env.example .env   
+npm run dev              
+npm run build           
 ```
-
-## Páginas
-- Dashboard
-- Upload de documentos
-- Fila de processamento
-- Revisão humana
-- Histórico e rastreabilidade
-- Configurações
