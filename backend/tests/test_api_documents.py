@@ -884,17 +884,25 @@ def test_criar_app_seleciona_storage_mock(monkeypatch):
     assert isinstance(app.state.storage, MockStorage)
 
 
-def test_criar_app_nao_substitui_oci_por_mock(monkeypatch):
+def test_criar_app_seleciona_storage_oci(monkeypatch):
+    from unittest.mock import Mock
+
+    import app.main as main_module
+
     monkeypatch.setenv("STORAGE_BACKEND", "oci")
     monkeypatch.setenv("OCI_NAMESPACE", "namespace-teste")
     monkeypatch.setenv("OCI_REGION", "regiao-teste")
     monkeypatch.setenv("OCI_BUCKET", "bucket-teste")
 
-    with pytest.raises(
-        RuntimeError,
-        match="OCI ainda nao esta integrado",
-    ):
-        criar_app()
+    storage_simulado = Mock()
+
+    mock_oci = Mock(return_value=storage_simulado)
+    monkeypatch.setattr(main_module, "OCIStorage", mock_oci)
+
+    app = criar_app()
+
+    mock_oci.assert_called_once_with(app.state.settings)
+    assert app.state.storage is storage_simulado
 
 
 def test_documento_com_ponto_no_id_pode_ser_consultado_e_listado(
