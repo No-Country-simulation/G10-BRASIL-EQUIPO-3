@@ -9,6 +9,7 @@ from app.api.ready import router as ready_router
 from app.core.config import carregar_configuracao
 from app.storage.local_storage import MockStorageLocal
 from app.storage.mock_storage import MockStorage
+from app.storage.oci_storage import OCIStorage
 
 
 def criar_app() -> FastAPI:
@@ -28,8 +29,11 @@ def criar_app() -> FastAPI:
     elif settings.storage_backend == "local":
         app.state.storage = MockStorageLocal(Path(settings.storage_local_dir))
 
+    elif settings.storage_backend == "oci":
+        app.state.storage = OCIStorage(settings)
+
     else:
-        raise RuntimeError("O armazenamento OCI ainda nao esta integrado ao FastAPI.")
+        raise RuntimeError("Backend de armazenamento nao suportado.")
 
     app.include_router(health_router)
     app.include_router(documents_router)

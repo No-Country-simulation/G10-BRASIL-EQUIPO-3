@@ -12,3 +12,4 @@ fastapi
 uvicorn[standard]
 python-multipart
 httpx
+oci==2.191.0
