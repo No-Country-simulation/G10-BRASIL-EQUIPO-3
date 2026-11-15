@@ -108,7 +108,7 @@ flowchart TD
 | Linguagem (backend) | Python 3.11+ |
 | API REST | FastAPI |
 | Validação de dados | Pydantic |
-| IA / LLM | Google Gemini Flash (`google-genai`) |
+| IA / LLM | Groq (`groq`), Google Gemini (`google-genai`) e provedor mock |
 | Leitura de PDF | PyMuPDF |
 | Tratamento de imagem | Pillow |
 | Armazenamento | OCI Object Storage (camada Always Free) |
@@ -129,9 +129,145 @@ G10-BRASIL-EQUIPO-3/
 └── README.md
 ```
 
+
 ## 🚀 Como Executar
 
-_Em breve._ As instruções de instalação e execução serão adicionadas assim que os pontos de entrada da API e do frontend estiverem definidos.
+### Pré-requisitos
+
+- Python 3.11 ou superior;
+- Git;
+- Acesso ao terminal;
+- Credenciais de serviços externos somente quando utilizar Groq, Gemini ou OCI.
+
+As instruções abaixo descrevem a execução local do backend.
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/No-Country-simulation/G10-BRASIL-EQUIPO-3.git
+cd G10-BRASIL-EQUIPO-3
+```
+
+### 2. Criar e ativar o ambiente virtual
+
+No Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Instalar as dependências
+
+Na raiz do projeto:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+### 4. Configurar as variáveis de ambiente
+
+Entre na pasta do backend:
+
+```powershell
+cd backend
+```
+
+Crie uma cópia do arquivo de exemplo:
+
+```powershell
+if (-not (Test-Path .env)) {
+    Copy-Item env.example .env
+}
+```
+
+Para executar sem acessar provedores externos, utilize:
+
+```env
+LLM_PROVIDER=mock
+STORAGE_BACKEND=mock
+```
+
+Para utilizar o Groq:
+
+```env
+LLM_PROVIDER=groq
+LLM_MODEL=qwen/qwen3.8-27b
+GROQ_API_KEY=SUA_CHAVE_AQUI
+```
+
+O modelo indicado foi utilizado nos testes integrados do MediFlow. Sua disponibilidade depende da conta e do provedor.
+
+Para utilizar OCI Object Storage:
+
+```env
+STORAGE_BACKEND=oci
+OCI_NAMESPACE=SEU_NAMESPACE
+OCI_REGION=SUA_REGIAO
+OCI_BUCKET=SEU_BUCKET
+OCI_CONFIG_PROFILE=DEFAULT
+```
+
+A integração com OCI também requer configuração local do SDK e credenciais de acesso autorizadas.
+
+**Segurança:** nunca versionar o arquivo `.env`, chaves de API ou credenciais da OCI. Utilizar somente documentos sintéticos durante os testes.
+
+### 5. Iniciar a API
+
+Ainda na pasta `backend`, execute:
+
+```powershell
+python -m uvicorn app.main:app --port 8000
+```
+
+Acesse a documentação interativa:
+
+http://127.0.0.1:8000/docs
+
+### 6. Testar a triagem pelo Swagger
+
+No Swagger UI, utilize:
+
+`POST /api/v1/documents/triage/upload`
+
+Envie um documento sintético e informe os parâmetros:
+
+- `arquivo`: documento para processamento;
+- `tipo_arquivo`: tipo do arquivo enviado;
+- `canal_origem`: canal de recebimento;
+- `documento_id`: opcional.
+
+A resposta contém classificação, dados extraídos, validações e decisão de roteamento.
+
+Para recuperar um documento processado, utilize:
+
+`GET /api/v1/documents/{documento_id}`
+
+### 7. Executar os testes automatizados
+
+Em outro terminal, com o ambiente virtual ativado, acesse a pasta `backend`.
+
+Para executar os testes com o armazenamento mock, sem utilizar a OCI real:
+
+```powershell
+$env:STORAGE_BACKEND = "mock"
+python -m pytest -q
+Remove-Item Env:STORAGE_BACKEND
+```
+
+Na última execução validada, a suíte apresentou **129 testes aprovados e 1 ignorado**. Os resultados podem variar conforme novas alterações no código.
+
+### 8. Documentação dos testes integrados
+
+- [Fase 8 — Testes integrados com OCI](backend/docs/testes-integracao-fase8.md)
+- [Testes com Groq real e OCI](backend/docs/testes-integracao-groq.md)
+
+Os testes com Groq confirmaram classificação, extração, validação, roteamento, persistência na OCI e recuperação pela API utilizando um documento fictício.
+
+### Observação
+
+O MediFlow é uma ferramenta de triagem administrativa. Os resultados gerados por IA não substituem avaliação ou decisão de profissionais de saúde.
+
 
 ## 👥 Equipe (Grupo 10 - ONE)
 
