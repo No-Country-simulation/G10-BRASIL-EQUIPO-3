@@ -144,9 +144,13 @@ Sugere-se avaliar o preenchimento desse campo nas respostas futuras.
 
 ### 8.3. Cobertura dos testes
 
-O cenário executado validou uma receita médica sintética, com prioridade de rotina e encaminhamento para auditoria humana.
+A primeira rodada de testes com Groq real contemplou uma receita médica sintética encaminhada para auditoria humana.
 
-Ainda não foram realizados nesta rodada testes com diferentes categorias de documentos utilizando o Groq real, cenários de urgência ou falhas de comunicação com o provedor.
+Em 15/11/2026, a cobertura foi ampliada com outros dois cenários: uma receita médica sem inconsistências, encaminhada automaticamente à Farmácia Hospitalar, e um laudo fictício com sinais de urgência, encaminhado à Fila de Emergência Médica.
+
+Os resultados completos estão registrados nas seções 10, 11 e 12 deste documento.
+
+Permanecem como possibilidades de testes complementares os cenários de urgência com baixa confiança e falhas reais de comunicação com o provedor..
 
 ## 9. Conclusão
 
@@ -162,3 +166,161 @@ Foi possível:
 6. Recuperar o resultado por meio de endpoint GET.
 
 O teste fornece evidências do funcionamento do fluxo principal do MediFlow com IA real, sem representar uma validação completa de todos os cenários do sistema.
+
+---
+
+## 10. Cenário 2 — Receita médica sem inconsistências
+
+**Data:** 15/11/2026
+
+**Objetivo:** validar o encaminhamento automático de uma receita médica sintética, sem necessidade de revisão humana.
+
+### Documento utilizado
+
+- Arquivo: `mediflow_cenario2.txt`
+- Paciente: Paciente Exemplo Dois
+- Idade: 35 anos
+- Médico: Dr. Exemplo
+- CRM: 123456
+- UF do CRM: SP
+- Medicamento: Paracetamol
+- Dosagem: 500 mg
+- Posologia: 1 comprimido a cada 8 horas por 3 dias
+- Canal de origem: `AMBULATORIO`
+
+### Execução
+
+Endpoint: `POST /api/v1/documents/triage/upload`
+
+Identificador: `DOC-18A3B83C98E3`
+
+Código HTTP: `200`
+
+| Campo | Resultado |
+|---|---|
+| Provedor | groq |
+| Modelo | qwen/qwen3.8-27b |
+| Tipo de documento | receita_medica |
+| Prioridade | rotina |
+| Confiança da classificação | 0.95 |
+| Confiança da extração | 0.85 |
+| Status | processado |
+| Validações | [] |
+| Destino | FARMACIA_HOSPITALAR |
+| Auditoria humana necessária | false |
+| Código do motivo | criterios_atendidos |
+| Versão | 1 |
+
+### Persistência na OCI
+
+A existência do resultado foi confirmada diretamente no bucket por meio do SDK Python da OCI:
+
+`processados/DOC-18A3B83C98E3/resultado_v001.json`
+
+### Conclusão
+
+O sistema classificou e extraiu os dados do documento fictício e aplicou o roteamento automático para a Farmácia Hospitalar.
+
+Diferentemente do primeiro cenário, o CRM e sua UF foram apresentados e extraídos separadamente, sem gerar inconsistência de formato.
+
+O teste validou o processamento e a existência do resultado persistido na OCI.
+
+---
+
+## 11. Cenário 3 — Laudo com sinal de urgência
+
+**Data:** 15/11/2026
+
+**Objetivo:** verificar a identificação de possíveis sinais de urgência e o encaminhamento prioritário definido pelas regras do MediFlow.
+
+### Documento utilizado
+
+- Arquivo: `mediflow_cenario3_urgencia.txt`
+- Tipo: laudo de exame fictício
+- Paciente: Paciente Exemplo Tres
+- Idade: 58 anos
+- Exame: Angiotomografia computadorizada de tórax
+- Achado descrito: compatibilidade com tromboembolismo pulmonar agudo
+- Conclusão: correlação clínica urgente recomendada
+- Canal de origem: `PRONTO_SOCORRO`
+
+O documento foi produzido exclusivamente para teste, sem validade médica ou diagnóstica.
+
+### Execução
+
+Endpoint: `POST /api/v1/documents/triage/upload`
+
+Identificador: `DOC-5D1A11DE4D26`
+
+Código HTTP: `200`
+
+| Campo | Resultado |
+|---|---|
+| Provedor | groq |
+| Modelo | qwen/qwen3.8-27b |
+| Tipo de documento | laudo_exame |
+| Prioridade | urgente |
+| Confiança da classificação | 0.95 |
+| Confiança da extração | 0.95 |
+| Status | processado |
+| Validações | [] |
+| Destino | FILA_EMERGENCIA_MEDICA |
+| Auditoria humana necessária | false |
+| Código do motivo | urgencia_confiavel |
+| Versão | 1 |
+
+### Identificação de urgência
+
+O sistema identificou sinais de urgência provenientes de duas fontes:
+
+1. **LLM:** menção explícita à urgência na conclusão do laudo.
+2. **Regras determinísticas:** identificação dos termos configurados `tromboembolismo pulmonar agudo` e `correlacao clinica urgente`.
+
+O encaminhamento para a fila de emergência foi realizado porque os critérios configurados de confiança e evidência foram atendidos.
+
+### Registro do alerta
+
+A resposta apresentou o campo `notificacao_gerada` preenchido com:
+
+- Canal: `Alerta_Plantao_Medico`
+- Documento: `DOC-5D1A11DE4D26`
+- Evidências associadas aos sinais de urgência
+
+A geração desse registro não comprova entrega de notificação externa a profissionais de saúde.
+
+### Persistência na OCI
+
+A existência do resultado foi confirmada diretamente no bucket por meio do SDK Python da OCI:
+
+`processados/DOC-5D1A11DE4D26/resultado_v001.json`
+
+### Conclusão
+
+O sistema classificou o laudo fictício, identificou sinais de urgência por IA e regras determinísticas e definiu o encaminhamento para `FILA_EMERGENCIA_MEDICA`.
+
+Também registrou um evento de alerta e persistiu o resultado na OCI.
+
+---
+
+## 12. Resumo dos três cenários com Groq real
+
+| Cenário | Documento | Decisão | Resultado |
+|---|---|---|---|
+| 1 | Receita com CRM em formato inconsistente | FILA_REVISAO_HUMANA | Validado |
+| 2 | Receita sem inconsistências | FARMACIA_HOSPITALAR | Validado |
+| 3 | Laudo com sinal de urgência | FILA_EMERGENCIA_MEDICA | Validado |
+
+Os três cenários utilizaram documentos sintéticos, o provedor Groq real, as regras do backend e a persistência na OCI Object Storage.
+
+A existência dos arquivos de resultado foi confirmada na OCI. No primeiro cenário também foram verificados o documento original e a recuperação pela API GET.
+
+### Limitações e testes complementares
+
+- O campo `armazenamento_oci` continuou retornando `null` nos testes.
+- Ainda não foi testada nesta rodada a urgência com baixa confiança, que deve exigir revisão humana prioritária.
+- Não foram validadas falhas reais de comunicação com o provedor Groq.
+- Não foi realizada nesta rodada a integração completa com o frontend.
+- As pontuações de confiança são saídas do sistema e não comprovam precisão clínica.
+- A classificação de urgência não substitui avaliação profissional.
+
+Os resultados demonstram três fluxos funcionais do MVP, mas não equivalem a uma validação clínica ou a uma aprovação para uso com documentos reais.
