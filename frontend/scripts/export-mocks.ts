@@ -1,8 +1,3 @@
-/**
- * Entrada de build (SSR) usada por `validar-contratos.mjs`.
- * Exporta, como JSON, tudo o que o modo de demonstração produz — sementes, cenários e o resultado
- * de revisões simuladas — para que o Python valide contra os schemas Pydantic REAIS.
- */
 import {registrarRevisao} from '../src/mocks/backendRules';
 import {
   cenarioBaixaConfianca,

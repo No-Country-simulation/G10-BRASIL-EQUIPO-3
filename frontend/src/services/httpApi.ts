@@ -1,26 +1,29 @@
 /**
- * Cliente HTTP REAL.
+ * Cliente HTTP REAL do backend (FastAPI, `backend/app/api/documents.py`).
  *
- * As rotas abaixo são uma PROPOSTA de contrato para a equipe de backend: o repositório
- * oficial ainda não possui camada HTTP. Todas ficam concentradas em `ROTAS` para que, quando
- * o backend publicar os caminhos definitivos, só este objeto precise mudar.
- * Corpos e respostas são exatamente os schemas Pydantic (ver `types/dto.ts`).
+ * Rotas (prefixo `/api/v1`, que é a base `VITE_API_URL`):
+ *   GET  /documents                 → RespostaTriagem[]   (última versão de cada documento)
+ *   GET  /documents/{id}            → RespostaTriagem     (404 se não existir)
+ *   POST /documents/triage          → RespostaTriagem     (JSON `EntradaTriagem`)
+ *   POST /documents/triage/upload   → RespostaTriagem     (multipart: arquivo, tipo_arquivo, canal_origem)
+ *   POST /documents/{id}/review     → RespostaTriagem     (JSON `RequisicaoRevisao`; 409 se versão/estado inválido)
+ * O processamento é SÍNCRONO: a resposta do POST já traz o resultado final (processado/em_auditoria/erro).
  */
 import {config} from '../config/env';
 import type {MediflowApi, EnvioArquivo} from './contract';
 import {ApiError, ApiUnavailableError, extrairDetalhe} from './errors';
+import {lerToken, notificarNaoAutorizado} from '../lib/session';
 import type {EntradaTriagemDTO, RequisicaoRevisaoDTO, RespostaTriagemDTO} from '../types/dto';
 
 export const ROTAS = {
-  /** GET → RespostaTriagem[] · POST (JSON EntradaTriagem | multipart) → RespostaTriagem */
-  triagem: '/triagem',
-  /** GET → RespostaTriagem */
-  documento: (id: string) => `/triagem/${encodeURIComponent(id)}`,
-  /** POST RequisicaoRevisao → RespostaTriagem */
-  revisao: (id: string) => `/triagem/${encodeURIComponent(id)}/revisao`,
+  documentos: '/documents',
+  documento: (id: string) => `/documents/${encodeURIComponent(id)}`,
+  triagemTexto: '/documents/triage',
+  triagemUpload: '/documents/triage/upload',
+  revisao: (id: string) => `/documents/${encodeURIComponent(id)}/review`,
 } as const;
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const url = `${config.apiUrl}${path}`;
   let res: Response;
   try {
@@ -29,6 +32,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers: {
         Accept: 'application/json',
         ...(init.body && !(init.body instanceof FormData) ? {'Content-Type': 'application/json'} : {}),
+        ...(lerToken() ? {Authorization: `Bearer ${lerToken()}`} : {}),
         ...init.headers,
       },
     });
@@ -44,13 +48,18 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     corpo = undefined; // corpo não-JSON (ex.: HTML de um proxy)
   }
 
-  if (!res.ok) throw new ApiError(res.status, extrairDetalhe(corpo, texto.slice(0, 200) || res.statusText));
+  if (!res.ok) {
+    if (res.status === 401 && path !== '/auth/login') notificarNaoAutorizado();
+    // 5xx sem corpo JSON não veio do FastAPI (proxy sem backend, gateway...): tratar como indisponível.
+    if (res.status >= 500 && corpo === undefined) throw new ApiUnavailableError(config.apiUrl);
+    throw new ApiError(res.status, extrairDetalhe(corpo, texto.slice(0, 200) || res.statusText));
+  }
   if (corpo === undefined) throw new ApiError(res.status, 'A API respondeu sem um corpo JSON válido.');
   return corpo as T;
 }
 
 export const httpApi: MediflowApi = {
-  listarDocumentos: () => request<RespostaTriagemDTO[]>(ROTAS.triagem),
+  listarDocumentos: () => request<RespostaTriagemDTO[]>(ROTAS.documentos),
 
   obterDocumento: (id) => request<RespostaTriagemDTO>(ROTAS.documento(id)),
 
@@ -60,11 +69,11 @@ export const httpApi: MediflowApi = {
     body.append('arquivo', arquivo, arquivo.name);
     body.append('tipo_arquivo', tipoArquivo);
     body.append('canal_origem', canalOrigem);
-    return request<RespostaTriagemDTO>(ROTAS.triagem, {method: 'POST', body});
+    return request<RespostaTriagemDTO>(ROTAS.triagemUpload, {method: 'POST', body});
   },
 
   enviarTexto: (entrada: EntradaTriagemDTO) =>
-    request<RespostaTriagemDTO>(ROTAS.triagem, {method: 'POST', body: JSON.stringify(entrada)}),
+    request<RespostaTriagemDTO>(ROTAS.triagemTexto, {method: 'POST', body: JSON.stringify(entrada)}),
 
   registrarRevisao: (id: string, requisicao: RequisicaoRevisaoDTO) =>
     request<RespostaTriagemDTO>(ROTAS.revisao(id), {method: 'POST', body: JSON.stringify(requisicao)}),

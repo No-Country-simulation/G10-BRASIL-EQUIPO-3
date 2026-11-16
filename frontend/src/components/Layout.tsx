@@ -1,10 +1,13 @@
 import {Link, Outlet, useLocation} from 'react-router-dom';
-import {Bell, FilePlus2, FolderOpen, LayoutDashboard, Settings} from 'lucide-react';
+import {FilePlus2, FolderOpen, LayoutDashboard, LogOut, Settings} from 'lucide-react';
 import {config, isMock} from '../config/env';
 import {useDocuments} from '../context/DocumentsContext';
+import {useAuth} from '../context/AuthContext';
 import {useSettings} from '../context/SettingsContext';
 import {ThemeToggle} from './ThemeToggle';
 import {DemoBanner} from './DemoBanner';
+import {HelpGuide} from './HelpGuide';
+import {NotificationBell} from './NotificationBell';
 
 /** Ordem do menu: Dashboard fica por último, de propósito. */
 const nav = [
@@ -46,9 +49,9 @@ export function Layout() {
   const crumbs = useCrumbs();
   const {views} = useDocuments();
   const {preferencias} = useSettings();
-  const pendentes = views.filter((d) => d.revisaoDisponivel);
-  const summary = {pending: pendentes.length, emergency: pendentes.filter((d) => d.urgente).length};
-  const revisor = preferencias.revisor.trim();
+  const summary = {pending: views.filter((d) => d.revisaoDisponivel).length};
+  const {habilitado, usuario, logout} = useAuth();
+  const revisor = (usuario?.nome || usuario?.email || preferencias.revisor).trim();
   const iniciais = revisor ? revisor.slice(0, 2).toUpperCase() : '?';
   const today = new Date().toLocaleDateString('pt-BR', {day: 'numeric', month: 'short', year: 'numeric'});
 
@@ -75,13 +78,22 @@ export function Layout() {
           <div className="avatar">{iniciais}</div>
           <div>
             <b>{revisor || 'Revisor não informado'}</b>
-            <span>Identificador informado, não autenticado</span>
+            <span>{usuario ? usuario.perfil : 'Identificador informado, não autenticado'}</span>
           </div>
+          {habilitado && (
+            <button className="logout-btn" onClick={logout} aria-label="Sair" title="Sair">
+              <LogOut size={15} />
+              Sair
+            </button>
+          )}
         </div>
       </aside>
 
       <main>
         <header>
+          <span className="mobile-brand">
+            <span className="brand-mark">✚</span>mediflow
+          </span>
           <div className="crumb">
             Área de trabalho
             {crumbs.map((c) => (
@@ -94,15 +106,13 @@ export function Layout() {
           <div className="header-actions">
             <span className="today">{today}</span>
             <ThemeToggle />
-            <Link
-              to="/processar?tab=pendentes&prioridade=urgente"
-              className="icon-button bell"
-              aria-label={summary?.emergency ? `${summary.emergency} emergências aguardando revisão` : 'Nenhuma emergência pendente'}
-              title="Urgências pendentes"
-            >
-              <Bell size={18} />
-              {!!summary?.emergency && <em>{summary.emergency}</em>}
-            </Link>
+            <HelpGuide />
+            <NotificationBell />
+            {habilitado && (
+              <button className="logout-btn logout-mobile" onClick={logout} aria-label="Sair" title="Sair">
+                <LogOut size={18} />
+              </button>
+            )}
           </div>
         </header>
         <DemoBanner />

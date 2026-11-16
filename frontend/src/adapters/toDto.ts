@@ -1,14 +1,3 @@
-/**
- * Formulário (apresentação) → DTO de envio.
- *
- * Espelha, para dar feedback imediato, as regras de `backend/app/schemas/review.py`:
- *   - rejeitar exige justificativa e NÃO aceita correções;
- *   - aprovar com correções exige justificativa;
- *   - uma correção por campo; correção sem mudança de valor é descartada
- *     (o backend rejeita "a correção não altera o valor do campo");
- *   - `versao_resultado_base` ≥ 1.
- * O backend continua sendo a autoridade: qualquer erro dele é exibido ao usuário.
- */
 import type {
   CanalOrigemDTO,
   EntradaTriagemDTO,

@@ -3,7 +3,9 @@ import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {Layout} from './components/Layout';
 import {ThemeProvider} from './context/ThemeContext';
 import {SettingsProvider} from './context/SettingsContext';
-import {DocumentsProvider} from './context/DocumentsContext';
+import {AuthProvider} from './context/AuthContext';
+import {RequireAuth} from './components/RequireAuth';
+import Login from './pages/Login';
 import {ToastProvider} from './context/ToastContext';
 import Process from './pages/Process';
 import Documents from './pages/Documents';
@@ -18,9 +20,11 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <SettingsProvider>
-          <DocumentsProvider>
+          <AuthProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route element={<RequireAuth />}>
               <Route element={<Layout />}>
                 <Route index element={<Navigate to="/processar" replace />} />
                 <Route path="/processar" element={<Process />} />
@@ -44,9 +48,10 @@ export default function App() {
                 <Route path="/revisao" element={<LegacyReviewRedirect />} />
                 <Route path="*" element={<Navigate to="/processar" replace />} />
               </Route>
+              </Route>
             </Routes>
           </BrowserRouter>
-          </DocumentsProvider>
+          </AuthProvider>
         </SettingsProvider>
       </ToastProvider>
     </ThemeProvider>

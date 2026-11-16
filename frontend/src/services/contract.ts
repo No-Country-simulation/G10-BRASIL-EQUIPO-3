@@ -6,12 +6,8 @@
  * interface e trafegam apenas DTOs (`types/dto.ts`). Conversão para domínio/apresentação
  * acontece acima desta camada.
  *
- * ATENÇÃO — situação do backend (repositório G10-BRASIL-EQUIPO-3):
- * não existe aplicação FastAPI nem rotas HTTP. Já existem como código Python:
- *   - processar documento  → `TriageService.processar(DocumentoRecebido)`
- *   - registrar revisão    → `review_service.registrar_revisao(resposta, requisicao)`
- * NÃO existem (dependem de persistência/HTTP das Fases 6 e 7): listar, obter por id,
- * armazenamento e a própria camada HTTP. Veja docs/INTEGRACAO_BACKEND.md.
+ * Backend: FastAPI em `backend/app/api/documents.py` (rotas em `httpApi.ts`). O processamento é
+ * síncrono; o mock imita o mesmo contrato, inclusive os erros 404/409.
  */
 import type {CanalOrigemDTO, EntradaTriagemDTO, RequisicaoRevisaoDTO, RespostaTriagemDTO, TipoArquivoDTO} from '../types/dto';
 

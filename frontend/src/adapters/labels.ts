@@ -1,7 +1,3 @@
-/**
- * Rótulos de exibição (pt-BR). Ficam separados dos valores do backend, que são os
- * identificadores estáveis (ver docstring de enums.py): o texto pode mudar sem afetar contratos.
- */
 import type {
   CanalOrigem,
   CodigoErro,

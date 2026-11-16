@@ -1,14 +1,3 @@
-/**
- * DTO (backend) → Domínio (frontend).
- *
- * É o ÚNICO lugar que conhece o formato de transporte. Responsabilidades:
- *  - validar enums (valor desconhecido => ContractError, nunca um "palpite");
- *  - aplicar os defaults do Pydantic (campo omitido em `dados_extraidos` = `ausente`);
- *  - achatar `dados_extraidos` em chaves canônicas (mesma ordem de `campos_planos()`);
- *  - renomear snake_case → camelCase.
- *
- * Não inventa dados: o que o backend não envia fica `null`/vazio.
- */
 import {
   CANAIS_NOTIFICACAO,
   CANAIS_ORIGEM,

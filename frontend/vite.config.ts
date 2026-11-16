@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 /**
  * Em desenvolvimento, `/api` é encaminhado ao backend (proxy) para evitar CORS.
+ * O backend oficial ainda não expõe HTTP: ver docs/INTEGRACAO_BACKEND.md.
  */
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');

@@ -1,8 +1,3 @@
-#!/usr/bin/env node
-/**
- * Valida que os exemplos oficiais do backend são aceitos pelos adaptadores do frontend.
- *   MEDIFLOW_BACKEND_DIR=../G10-BRASIL-EQUIPO-3-main/backend npm run validar:exemplos
- */
 import {mkdtempSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';

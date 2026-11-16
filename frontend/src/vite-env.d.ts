@@ -6,4 +6,5 @@ interface ImportMetaEnv {
   readonly VITE_PROXY_TARGET?: string;
   readonly VITE_MAX_UPLOAD_MB?: string;
   readonly VITE_POLL_INTERVAL_MS?: string;
+  readonly VITE_REFRESH_INTERVAL_MS?: string;
 }

@@ -1,5 +1,3 @@
-"""Valida o JSON exportado pelo modo de demonstração contra os schemas Pydantic do backend."""
-
 from __future__ import annotations
 
 import json
@@ -34,7 +32,7 @@ for r in dados["respostas"]:
     total += 1
     try:
         RespostaTriagem.model_validate(r)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  
         falhas.append(f"resposta {r.get('documento_id')}: {str(exc)[:400]}")
 
 # 2) Revisões simuladas (TS) × `registrar_revisao` (Python).
@@ -54,7 +52,7 @@ for rev in dados["revisoes"]:
         continue
     try:
         obtido = RespostaTriagem.model_validate(rev["saida"])
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  
         falhas.append(f"{rotulo}: saída do mock inválida: {str(exc)[:400]}")
         continue
     a, b = normalizar(obtido), normalizar(esperado)

@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Monitor, Moon, Sun} from 'lucide-react';
-import {config, isMock} from '../config/env';
+import {useAuth} from '../context/AuthContext';
 import {useSettings} from '../context/SettingsContext';
 import {useTheme, type ThemePreference} from '../context/ThemeContext';
 import {useToast} from '../context/ToastContext';
@@ -16,6 +16,7 @@ export default function Settings() {
   const {preferencias, salvar} = useSettings();
   const {preference, setPreference} = useTheme();
   const toast = useToast();
+  const {usuario, habilitado, logout} = useAuth();
   const [draft, setDraft] = useState<Preferencias>(preferencias);
 
   useEffect(() => setDraft(preferencias), [preferencias]);
@@ -92,32 +93,36 @@ export default function Settings() {
           </div>
         </div>
 
+        {usuario ? (
+          <div className="card">
+            <h2>Conta</h2>
+            <p>
+              <b>{usuario.nome}</b>
+              <br />
+              <span className="muted-text">{usuario.email} · {usuario.perfil}</span>
+            </p>
+            <p className="muted-text">As revisões são registradas com a identidade desta conta.</p>
+            {habilitado && <button onClick={logout}>Sair da conta</button>}
+          </div>
+        ) : (
         <div className="card">
-          <h2>Revisor</h2>
-          <label className="range-label" htmlFor="revisor-pref">
-            Identificador usado nas revisões
-          </label>
-          <input
-            id="revisor-pref"
-            value={draft.revisor}
-            maxLength={120}
-            onChange={(e) => setDraft((d) => ({...d, revisor: e.target.value}))}
-            placeholder="Ex.: nome ou matrícula"
-          />
-          <p className="muted-text">
-            É apenas informado e registrado como <code>identidade_verificada = false</code>: o backend não autentica revisores. A rejeição sempre
-            exige justificativa (regra do backend).
-          </p>
-        </div>
-
-        <div className="card">
-          <h2>Integração da API</h2>
-          <div className="api-box">{isMock ? 'Sem API — dados simulados no navegador' : config.apiUrl}</div>
-          <p className="muted-text">
-            Modo: <b>{isMock ? 'demonstração (VITE_USE_MOCK=true)' : 'API real'}</b>. Altere em <code>.env</code>. O backend oficial ainda não
-            expõe rotas HTTP; veja <code>docs/INTEGRACAO_BACKEND.md</code>.
-          </p>
-        </div>
+            <h2>Revisor</h2>
+            <label className="range-label" htmlFor="revisor-pref">
+              Identificador usado nas revisões
+            </label>
+            <input
+              id="revisor-pref"
+              value={draft.revisor}
+              maxLength={120}
+              onChange={(e) => setDraft((d) => ({...d, revisor: e.target.value}))}
+              placeholder="Ex.: nome ou matrícula"
+            />
+            <p className="muted-text">
+              É apenas informado e registrado como <code>identidade_verificada = false</code>: o backend não autentica revisores. A rejeição sempre
+              exige justificativa (regra do backend).
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

@@ -8,10 +8,6 @@ interface Props {
   onSelectField?: (chave: string) => void;
 }
 
-/**
- * Mostra o arquivo original (imagem ou PDF) somente quando ele foi enviado por ESTE navegador:
- * o backend não devolve o arquivo. Sem ele, exibe as EVIDÊNCIAS que a IA citou (trechos literais).
- */
 export function DocumentViewer({doc, activeChave, onSelectField}: Props) {
   const activeRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {

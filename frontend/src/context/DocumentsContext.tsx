@@ -82,6 +82,40 @@ export function DocumentsProvider({children}: {children: ReactNode}) {
     return () => clearInterval(timer);
   }, [emAndamento]);
 
+  /* Atualização periódica silenciosa (fila e sininho). O backend não tem push; pausa com a aba oculta. */
+  useEffect(() => {
+    if (carga !== 'pronto') return;
+    let ocupado = false;
+    const atualizar = async () => {
+      if (ocupado || document.visibilityState !== 'visible') return;
+      ocupado = true;
+      try {
+        const lista = await documentos.listar();
+        // Mantém o que está em memória e que a listagem ainda não devolveu (ex.: acabou de ser criado).
+        setDocs((atual) => {
+          const porId = new Map(atual.map((d) => [d.id, d]));
+          // Nunca regride: se a cópia local já é mais nova (ex.: acabou de ser revisada), ela vence.
+          const mesclada = lista.map((l) => {
+            const local = porId.get(l.id);
+            return local && local.versao > l.versao ? local : l;
+          });
+          return [...mesclada, ...atual.filter((d) => !lista.some((l) => l.id === d.id))];
+        });
+        setErroSincronizacao('');
+      } catch (e) {
+        setErroSincronizacao(mensagemDeErro(e));
+      } finally {
+        ocupado = false;
+      }
+    };
+    const timer = setInterval(atualizar, config.refreshIntervalMs);
+    document.addEventListener('visibilitychange', atualizar);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', atualizar);
+    };
+  }, [carga]);
+
   const carregarUm = useCallback(
     async (id: string) => {
       const d = await documentos.obter(id);

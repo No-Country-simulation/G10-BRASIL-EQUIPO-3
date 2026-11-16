@@ -1,16 +1,3 @@
-#!/usr/bin/env node
-/**
- * Valida os dados do modo de demonstração contra os schemas Pydantic REAIS do backend.
- *
- *   MEDIFLOW_BACKEND_DIR=../G10-BRASIL-EQUIPO-3-main/backend npm run validar:contratos
- *   (ou: node scripts/validar-contratos.mjs <caminho-para-a-pasta-backend>)
- *
- * 1. empacota src/mocks (via Vite, modo SSR) e grava o JSON de tudo que o mock produz;
- * 2. `validar_contratos.py` valida cada resposta com `RespostaTriagem` e compara as revisões
- *    simuladas com `app.services.review_service.registrar_revisao` (paridade TS ↔ Python).
- *
- * Requer Python 3.11+ com `pydantic` instalado (`pip install pydantic`).
- */
 import {mkdtempSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';

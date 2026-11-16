@@ -1,8 +1,3 @@
-/**
- * Passa os exemplos OFICIAIS do backend (`backend/docs/exemplos/resposta_*.json`) pelos adaptadores
- * do frontend (DTO → domínio → apresentação). Falha se algum exemplo não for aceito ou se alguma
- * garantia de apresentação for violada. Executado por `validar-exemplos.mjs`.
- */
 import {readdirSync, readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {toDocumento} from '../src/adapters/toDomain';

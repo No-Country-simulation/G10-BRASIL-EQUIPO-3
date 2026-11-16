@@ -27,12 +27,16 @@ function parsePositiveNumber(name: string, value: string | undefined, fallback: 
 
 export const config = {
   dataSource: (parseBoolean('VITE_USE_MOCK', env.VITE_USE_MOCK) ? 'mock' : 'api') as DataSource,
-  /** Base da API. Em desenvolvimento o Vite faz proxy de `/api` (ver vite.config.ts). */
-  apiUrl: (env.VITE_API_URL || '/api').replace(/\/+$/, ''),
+  /** Base da API (prefixo do backend: `/api/v1`). Em desenvolvimento o Vite faz proxy de `/api` (ver vite.config.ts). */
+  apiUrl: (env.VITE_API_URL || '/api/v1').replace(/\/+$/, ''),
   /** Espelha `MAX_UPLOAD_SIZE_MB` do backend (padrão 10). Validação final é do backend. */
   maxUploadMb: parsePositiveNumber('VITE_MAX_UPLOAD_MB', env.VITE_MAX_UPLOAD_MB, 10),
   /** Intervalo de polling enquanto há documentos em `recebido`/`processando`. */
   pollIntervalMs: parsePositiveNumber('VITE_POLL_INTERVAL_MS', env.VITE_POLL_INTERVAL_MS, 1200),
+  /** Atualização periódica da lista (alimenta o sininho e a fila). O backend não tem push. */
+  refreshIntervalMs: parsePositiveNumber('VITE_REFRESH_INTERVAL_MS', env.VITE_REFRESH_INTERVAL_MS, 30000),
+  /** Login. O backend atual NÃO tem autenticação; com `VITE_AUTH_ENABLED=false` o site abre direto. */
+  authEnabled: env.VITE_AUTH_ENABLED === undefined || env.VITE_AUTH_ENABLED === '' ? true : parseBoolean('VITE_AUTH_ENABLED', env.VITE_AUTH_ENABLED),
 } as const;
 
 export const isMock = config.dataSource === 'mock';

@@ -3,6 +3,7 @@ import {Link, Navigate, useLocation, useNavigate, useParams, useSearchParams} fr
 import {ArrowLeft, Check, ChevronDown, LoaderCircle, RefreshCw, X} from 'lucide-react';
 import {montarCorrecoes, montarRequisicaoRevisao} from '../adapters/toDto';
 import {useDocuments} from '../context/DocumentsContext';
+import {useAuth} from '../context/AuthContext';
 import {useSettings} from '../context/SettingsContext';
 import {useToast} from '../context/ToastContext';
 import {useDocumento} from '../hooks/useDocumento';
@@ -41,7 +42,9 @@ export default function Review() {
 
   const [edicoes, setEdicoes] = useState<EdicoesRevisao>({});
   const [justificativa, setJustificativa] = useState('');
-  const [revisor, setRevisor] = useState(preferencias.revisor);
+  const {usuario} = useAuth();
+  const identidadeLogin = usuario ? usuario.nome || usuario.email : null;
+  const [revisor, setRevisor] = useState(identidadeLogin ?? preferencias.revisor);
   const [activeChave, setActiveChave] = useState<string | null>(null);
   const [showOk, setShowOk] = useState(false);
   const [showVazios, setShowVazios] = useState(false);
@@ -92,7 +95,7 @@ export default function Review() {
     setBusy(decisao);
     try {
       await revisar(doc.id, m.requisicao);
-      if (revisor.trim() !== preferencias.revisor) salvar({...preferencias, revisor: revisor.trim()});
+      if (!identidadeLogin && revisor.trim() !== preferencias.revisor) salvar({...preferencias, revisor: revisor.trim()});
       toast(decisao === 'aprovar' ? `${doc.id} aprovado.` : `${doc.id} rejeitado.`);
       navigate(origin);
     } catch (e) {
@@ -223,12 +226,12 @@ export default function Review() {
             <input
               id="revisor"
               value={revisor}
-              disabled={locked || busy !== null}
+              disabled={locked || busy !== null || !!identidadeLogin}
               maxLength={120}
               onChange={(e) => setRevisor(e.target.value)}
               placeholder="Ex.: nome ou matrícula"
             />
-            <p className="muted-text">Informado por você e registrado sem verificação de identidade (o backend não autentica).</p>
+            <p className="muted-text">{identidadeLogin ? 'Usuário da sessão atual.' : 'Informado por você e registrado sem verificação de identidade (o backend não autentica).'}</p>
             {doc.urgente && (
               <p className="muted-text">
                 Documento sinalizado como urgente: a urgência não é rebaixada. Aprovar encaminha à fila de emergência e registra o alerta; rejeitar

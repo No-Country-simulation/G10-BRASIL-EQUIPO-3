@@ -1,13 +1,3 @@
-/**
- * Domínio → Apresentação.
- *
- * Todos os textos, níveis de confiança e estados visuais derivados vivem aqui.
- * As páginas/componentes recebem `DocumentoView` pronto e não convertem propriedades.
- *
- * Duas métricas NUNCA se misturam:
- *   - prioridade clínica (`rotina` | `urgente`), decidida pelo backend;
- *   - confiança (0–1) da classificação, de cada campo e da extração.
- */
 import {
   CANAL_ROTULOS,
   CODIGO_VALIDACAO_ROTULOS,

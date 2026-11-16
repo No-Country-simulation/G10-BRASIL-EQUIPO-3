@@ -1,7 +1,3 @@
-/**
- * Metadados de apresentação das chaves canônicas de campo
- * (as mesmas de `CHAVES_CAMPOS` em backend/app/schemas/extraction.py).
- */
 import type {TipoEntrada} from '../types/view';
 
 const ROTULOS: Record<string, string> = {
