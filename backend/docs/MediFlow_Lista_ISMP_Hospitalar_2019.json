@@ -1,0 +1,453 @@
+{
+  "nome": "MediFlow - Catálogo de referência MPP / ISMP Brasil",
+  "natureza": "adaptação técnica não oficial para protótipo; não substitui a lista institucional",
+  "versao_base": "ISMP Brasil - uso hospitalar 2019",
+  "total_classes": 21,
+  "total_medicamentos_especificos": 9,
+  "fonte_primaria": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf",
+  "portal_oficial": "https://ismp-brasil.org/medicamentos-potencialmente-perigosos/",
+  "alerta": "Exigir validação de profissional habilitado antes de uso clínico. Correspondência textual isolada não é suficiente para classificação.",
+  "itens": [
+    {
+      "id": "ISMP-HOSP-001",
+      "tipo": "classe",
+      "nome": "Agonistas adrenérgicos",
+      "exemplos": [
+        "epinefrina",
+        "fenilefrina",
+        "norepinefrina"
+      ],
+      "criterio_de_enquadramento": "Somente quando a via de administração for endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-002",
+      "tipo": "classe",
+      "nome": "Água estéril para injeção/inalação/irrigação",
+      "exemplos": [
+        "água estéril"
+      ],
+      "criterio_de_enquadramento": "Embalagem de 100 mL ou mais, para as finalidades mencionadas.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-003",
+      "tipo": "classe",
+      "nome": "Analgésicos opioides",
+      "exemplos": [],
+      "criterio_de_enquadramento": "Via oral, transdérmica ou endovenosa; inclui formulações concentradas e de liberação modificada.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-004",
+      "tipo": "classe",
+      "nome": "Anestésicos gerais",
+      "exemplos": [
+        "propofol",
+        "cetamina"
+      ],
+      "criterio_de_enquadramento": "Anestésicos gerais de administração inalatória ou endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-005",
+      "tipo": "classe",
+      "nome": "Antagonistas adrenérgicos",
+      "exemplos": [
+        "propranolol",
+        "metoprolol"
+      ],
+      "criterio_de_enquadramento": "A categoria está condicionada à administração endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-006",
+      "tipo": "classe",
+      "nome": "Antiarrítmicos",
+      "exemplos": [
+        "lidocaína",
+        "amiodarona"
+      ],
+      "criterio_de_enquadramento": "A categoria está condicionada à administração endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-007",
+      "tipo": "classe",
+      "nome": "Antineoplásicos",
+      "exemplos": [],
+      "criterio_de_enquadramento": "Antineoplásicos administrados por via oral ou parenteral.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-008",
+      "tipo": "classe",
+      "nome": "Antitrombóticos",
+      "exemplos": [
+        "varfarina",
+        "heparina",
+        "dabigatrana",
+        "rivaroxabana",
+        "apixabana",
+        "edoxabana",
+        "fondaparinux",
+        "bivalirrudina",
+        "abciximabe",
+        "tirofibana",
+        "alteplase",
+        "tenecteplase",
+        "estreptoquinase"
+      ],
+      "criterio_de_enquadramento": "Abrange anticoagulantes, anticoagulantes orais diretos, inibidores do fator Xa, inibidores da trombina e GPIIb/IIIa e trombolíticos, segundo a lista de referência.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-009",
+      "tipo": "classe",
+      "nome": "Bloqueadores neuromusculares",
+      "exemplos": [
+        "suxametônio",
+        "rocurônio",
+        "pancurônio",
+        "vecurônio"
+      ],
+      "criterio_de_enquadramento": "Bloqueadores neuromusculares usados em ambiente hospitalar.",
+      "requer_contexto": false,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-010",
+      "tipo": "classe",
+      "nome": "Cloreto de sódio hipertônico injetável",
+      "exemplos": [
+        "cloreto de sódio"
+      ],
+      "criterio_de_enquadramento": "Concentração superior a 0,9%, na forma injetável; 0,9% não corresponde a esta regra.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-011",
+      "tipo": "classe",
+      "nome": "Glicose hipertônica",
+      "exemplos": [
+        "glicose"
+      ],
+      "criterio_de_enquadramento": "Concentração igual ou superior a 20%.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-012",
+      "tipo": "classe",
+      "nome": "Inotrópicos",
+      "exemplos": [
+        "milrinona",
+        "deslanosídeo",
+        "levosimendana"
+      ],
+      "criterio_de_enquadramento": "Quando administrados por via endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-013",
+      "tipo": "classe",
+      "nome": "Insulinas",
+      "exemplos": [
+        "insulina"
+      ],
+      "criterio_de_enquadramento": "Todas as apresentações usadas por via subcutânea ou endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-014",
+      "tipo": "classe",
+      "nome": "Medicamentos administrados por via epidural/intratecal",
+      "exemplos": [],
+      "criterio_de_enquadramento": "O enquadramento depende da via epidural ou intratecal; não se conclui apenas pelo princípio ativo.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-015",
+      "tipo": "classe",
+      "nome": "Formulações lipossomais e correspondentes convencionais",
+      "exemplos": [
+        "anfotericina B lipossomal",
+        "anfotericina B desoxicolato",
+        "doxorrubicina lipossomal",
+        "cloridrato de doxorrubicina"
+      ],
+      "criterio_de_enquadramento": "Comparar cuidadosamente formulação lipossomal com correspondente convencional.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-016",
+      "tipo": "classe",
+      "nome": "Sedativos para crianças",
+      "exemplos": [
+        "hidrato de cloral",
+        "midazolam",
+        "cetamina"
+      ],
+      "criterio_de_enquadramento": "Uso pediátrico com sedação mínima/moderada, conforme formulação e via; verificar cenário clínico.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-017",
+      "tipo": "classe",
+      "nome": "Sedativos endovenosos",
+      "exemplos": [
+        "dexmedetomidina",
+        "midazolam",
+        "lorazepam"
+      ],
+      "criterio_de_enquadramento": "Sedativos endovenosos de ação moderada.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-018",
+      "tipo": "classe",
+      "nome": "Soluções cardioplégicas",
+      "exemplos": [],
+      "criterio_de_enquadramento": "Solução utilizada para cardioplegia.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-019",
+      "tipo": "classe",
+      "nome": "Soluções de diálise",
+      "exemplos": [],
+      "criterio_de_enquadramento": "Soluções empregadas em diálise peritoneal ou hemodiálise.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-020",
+      "tipo": "classe",
+      "nome": "Nutrição parenteral",
+      "exemplos": [],
+      "criterio_de_enquadramento": "Soluções de nutrição administradas por via parenteral.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-021",
+      "tipo": "classe",
+      "nome": "Sulfonilureias",
+      "exemplos": [
+        "clorpropamida",
+        "glimepirida",
+        "glibenclamida",
+        "glipizida"
+      ],
+      "criterio_de_enquadramento": "Uso oral de medicamentos da classe das sulfonilureias.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-022",
+      "tipo": "medicamento_especifico",
+      "nome": "Cloreto de potássio concentrado injetável",
+      "exemplos": [
+        "cloreto de potássio"
+      ],
+      "criterio_de_enquadramento": "Exige confirmação de apresentação injetável concentrada.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-023",
+      "tipo": "medicamento_especifico",
+      "nome": "Epinefrina subcutânea",
+      "exemplos": [
+        "epinefrina",
+        "adrenalina"
+      ],
+      "criterio_de_enquadramento": "Enquadramento especificado para via subcutânea.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-024",
+      "tipo": "medicamento_especifico",
+      "nome": "Fosfato de potássio injetável",
+      "exemplos": [
+        "fosfato de potássio"
+      ],
+      "criterio_de_enquadramento": "Via injetável.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-025",
+      "tipo": "medicamento_especifico",
+      "nome": "Metotrexato oral não oncológico",
+      "exemplos": [
+        "metotrexato"
+      ],
+      "criterio_de_enquadramento": "Uso por via oral em indicação não oncológica; antineoplásicos estão em outra categoria.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-026",
+      "tipo": "medicamento_especifico",
+      "nome": "Nitroprussiato de sódio injetável",
+      "exemplos": [
+        "nitroprussiato de sódio"
+      ],
+      "criterio_de_enquadramento": "Forma injetável.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-027",
+      "tipo": "medicamento_especifico",
+      "nome": "Ocitocina endovenosa",
+      "exemplos": [
+        "ocitocina"
+      ],
+      "criterio_de_enquadramento": "Via endovenosa.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-028",
+      "tipo": "medicamento_especifico",
+      "nome": "Prometazina injetável",
+      "exemplos": [
+        "prometazina"
+      ],
+      "criterio_de_enquadramento": "Apresentação parenteral/injetável.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-029",
+      "tipo": "medicamento_especifico",
+      "nome": "Sulfato de magnésio injetável",
+      "exemplos": [
+        "sulfato de magnésio"
+      ],
+      "criterio_de_enquadramento": "Forma injetável.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    },
+    {
+      "id": "ISMP-HOSP-030",
+      "tipo": "medicamento_especifico",
+      "nome": "Vasopressina",
+      "exemplos": [
+        "vasopressina"
+      ],
+      "criterio_de_enquadramento": "Vias endovenosa ou intraóssea.",
+      "requer_contexto": true,
+      "escopo": "hospitalar",
+      "fonte_ano": 2019,
+      "validacao_clinica": "pendente",
+      "fonte_url": "https://ismp-brasil.org/wp-content/uploads/2024/06/BOLETIM-ISMP-FEVEREIRO-2019.pdf"
+    }
+  ]
+}
