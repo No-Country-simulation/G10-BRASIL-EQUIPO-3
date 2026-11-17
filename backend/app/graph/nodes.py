@@ -17,6 +17,7 @@ from app.rules.routing import achados_medicamentos_alto_risco, decidir_roteament
 from app.rules.urgency import aplicar_regras_urgencia
 from app.schemas.enums import CodigoErro, StatusProcessamento, StatusRevisao
 from app.schemas.output import ErroProcessamento, RespostaTriagem
+from app.rules.ismp import carregar_catalogo_ismp, gerar_achados_ismp
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,9 @@ def construir_nos(
         texto = state["documento_normalizado"].texto
         achados = validar_resultado(classificacao, dados, texto, configuracao.confidence_threshold)
         achados.extend(achados_medicamentos_alto_risco(dados, configuracao.high_risk_medications))
+        if configuracao.ismp_enabled:
+         itens_ismp = carregar_catalogo_ismp()
+         achados.extend(gerar_achados_ismp(dados, itens_ismp))
         return {"validacoes": achados, "etapa": etapa}
 
     def calcular_confianca(state: MediFlowState) -> dict[str, Any]:

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
         ]
     )
     high_risk_medications: list[str] = Field(default_factory=list)
+    ismp_enabled: bool = False
 
     storage_backend: Literal["mock", "local", "oci"] = "mock"
     storage_local_dir: str = ".mediflow_storage"
