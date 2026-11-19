@@ -2,10 +2,10 @@
 
 **Projeto:** MediFlow — Agente Inteligente de Triagem Clínica
 **Programa:** Hackathon ONE (Oracle Next Education + Alura)
-**Escopo deste documento:** backend (Python). A interface React é desenvolvida por outros integrantes da equipe.
-**Estado:** Fases 0 a 7 implementadas na branch `dev`. As Fases 5 e 6 foram integradas pelo merge `0c46772` (PR #1). A Fase 7 integrou o adaptador OCI ao FastAPI e foi validada pelo usuário com documento sintético: gravação e leitura de objetos, persistência após reiniciar a API, `404` para documento ausente e `409` para identificador duplicado. A análise real foi identificada como Groq.
+**Escopo deste documento:** backend (Python), com registro dos pontos de integração com a interface React.
+**Estado:** Fases 0 a 9 concluídas conforme implementação e evidências registradas. As Fases 5 e 6 foram integradas pelo merge `0c46772` (PR #1). As Fases 7 a 9 foram validadas com conteúdo sintético: armazenamento OCI, integração com Groq, testes automatizados do backend e documentação de integração. A publicação do frontend e backend na OCI ainda não foi realizada. O estado atual e os pré-requisitos de publicação estão na seção 19.
 
-**Última atualização:** 13/11/2026.
+**Última atualização:** 18/11/2026.
 
 > Este documento consolida o plano, as decisões tomadas e os ajustes feitos desde a Fase 0. Quando um item é uma **proposta ainda não confirmada**, ele está marcado como tal. Nenhuma funcionalidade é dada como concluída sem evidência de teste.
 
@@ -582,8 +582,8 @@ A suíte padrão roda **sem LLM real e sem credenciais OCI**.
 | Grafo | seis cenários determinísticos executados com provedor mock; sem chamada a LLM externa |
 | Revisão | aprovação com correção, rejeição sem justificativa (deve falhar), versão desatualizada, histórico e spy garantindo **zero chamadas adicionais à IA** |
 | API | endpoints via HTTPX: códigos HTTP, erros padronizados, sem stack trace |
-| Storage | MockStorage com falha injetada; integração OCI real exercitada manualmente; testes automatizados específicos do adaptador OCI pendentes |
-| Integração OCI real | Execução manual em conta configurada, com conteúdo sintético; fora da suíte padrão |
+| Storage | MockStorage com falha injetada e testes automatizados do adaptador OCI com cliente simulado; integração real exercitada manualmente |
+| Integração OCI real | Execução manual em conta configurada, com conteúdo sintético; permanece fora da suíte padrão para não exigir credenciais OCI |
 
 ### 14.2 Cenários de demonstração (versão atual)
 
@@ -615,9 +615,9 @@ Além dos seis cenários, os testes cobrem: revisão com correção, justificati
 | 4 | LangGraph, nós e arestas condicionais, regras de urgência, confiança, consistência e roteamento, revisão humana | Seis cenários determinísticos executados e aprovados; revisão sem nova chamada à IA | ✅ Concluída |
 | 5 | API REST, erros padronizados, testes HTTPX | Endpoints funcionais com testes | ✅ Implementada e integrada à `dev` pelo merge `0c46772`; endpoints exercitados manualmente no fluxo OCI |
 | 6 | MockStorage e fluxo ponta a ponta | Fluxo executável sem OCI real, com modo simulado explícito | ✅ Implementada e integrada à `dev`; usuário executou `tests/test_storage.py`: 20 aprovados, 1 ignorado por restrição de link simbólico no Windows |
-| 7 | Adaptador OCI real, permissões, instruções de validação | Adaptador integrado e fluxo real sintético de gravação, leitura, persistência, ausência e duplicidade validado | ✅ Implementada e validada manualmente; testes automatizados OCI, health check em `/ready` e prefixo especial de urgentes ainda pendentes |
-| 8 | Suíte integrada completa, rastreabilidade e persistência verificadas | Suíte completa aprovada no ambiente disponível e limitações documentadas | Pendente; a validação manual do OCI não substitui a suíte integrada automatizada |
-| 9 | README com Mermaid, instalação, endpoints, exemplos, modo mock e OCI, limitações e roteiro de demonstração | Outro integrante executa e testa seguindo a documentação | Pendente |
+| 7 | Adaptador OCI real, permissões, instruções de validação | Adaptador integrado e fluxo real sintético de gravação, leitura, persistência, ausência e duplicidade validado | ✅ Implementada; fluxo real validado manualmente e adaptador coberto por testes automatizados com cliente simulado. Health check profundo e prefixo especial de urgentes seguem como limitações |
+| 8 | Suíte integrada, rastreabilidade e persistência verificadas | Testes automatizados e fluxo manual OCI/Groq com conteúdo sintético concluídos; limitações registradas | ✅ Concluída: suíte registrada com 129 aprovados e 1 ignorado; cenários reais sintéticos de integração OCI/Groq validados. Avisos de dependência não impediram a aprovação |
+| 9 | Documentação, contratos e roteiro de demonstração | Instruções, endpoints, exemplos, modo mock/OCI, limitações e evidências registrados | ✅ Concluída para documentação do backend e testes. A documentação de implantação e a integração frontend/backend na nuvem permanecem como trabalho posterior |
 
 **Transversal:** commits descritivos por arquivo; Ruff configurado; nenhum segredo versionado.
 
@@ -639,11 +639,11 @@ Além dos seis cenários, os testes cobrem: revisão com correção, justificati
 - [x] API REST implementada e integrada à `dev` (`0c46772`)
 - [x] MockStorage em memória e local implementados e integrados à `dev`
 - [x] Adaptador OCI real integrado à API e validado no fluxo sintético principal
-- [x] Persistência real em OCI validada manualmente; cobertura automatizada OCI permanece pendente
+- [x] Persistência real em OCI validada manualmente; adaptador OCI coberto por testes automatizados com cliente simulado
 - [x] Seis cenários cobertos por testes determinísticos
 - [x] Erros técnicos tratados no fluxo da Fase 4
 - [x] Exemplos sintéticos dos cenários (JSON) disponíveis
-- [ ] Documentação completa
+- [x] Documentação das Fases 0 a 9 e evidências de teste registradas; documentação operacional de deploy OCI ainda pendente
 - [x] Nenhum segredo versionado (até a Fase 1)
 - [x] Testes executados e resultados registrados (20 aprovados e 1 ignorado em `tests/test_storage.py`; integração OCI validada manualmente pelo usuário)
 
@@ -713,15 +713,18 @@ Além dos seis cenários, os testes cobrem: revisão com correção, justificati
 | P-06 | Destino de `outro` e `indeterminado` **após aprovação humana** | Implementado: permanece em `FILA_REVISAO_HUMANA` com revisão `aprovada` | Equipe | Confirmar antes do uso operacional |
 | P-07 | Gerar alerta também na fila prioritária? | Implementado conforme o fluxograma: não gera alerta nessa fila | Equipe | Confirmar antes do uso operacional |
 | P-08 | CID-10 obrigatório em guias? | Não obrigatório | Equipe | Fase 4 |
-| P-09 | Transições do `/reroute` e de reprocessamento | Não implementadas na Fase 4; definir junto à API e aos fluxos das próximas fases | Equipe | Fases 5 e 8 |
+| P-09 | Transições do `/reroute` e de reprocessamento | Não implementadas; avaliar como evolução após as Fases 8 e 9 | Equipe | Antes de oferecer esses fluxos |
 | P-10 | Nome da pasta de falhas (`erros/` vs `falhas_processamento/`) | `falhas_processamento/` | Equipe | Fase 6 |
-| P-11 | Autenticação mínima (chave de API simples) | Opcional | Equipe | Fase 5 |
+| P-11 | Autenticação e autorização no backend | Obrigatória antes de disponibilização pública ou uso de dados clínicos; login atual do frontend aponta para endpoints que ainda não existem | Equipe | Antes de publicação pública |
 | P-12 | Numeração do grupo (3 ou 10) na README | — | Equipe | Fase 9 |
 | P-13 | Conta OCI Always Free, bucket e credenciais | Bucket criado e credenciais configuradas; fluxo real com conteúdo sintético validado na Fase 7 | Equipe | Concluída |
 | P-14 | **Chave do Gemini e política de dados do plano**; validar chamada real | Integração Gemini permanece opcional e não validada; Groq já foi validado para classificação e extração, portanto isso não bloqueia a Fase 3 | Equipe | Se Gemini for usado |
 | P-15 | Validação clínica da lista de sinais de urgência e da tabela de obrigatórios | Documentado como não validado | Equipe / profissional de saúde | Antes de qualquer uso real |
 | P-16 | Alinhar chave de objetos para urgências despachadas diretamente | O plano prevê `processados/urgentes/{id}/...`; o código atual usa `processados/{id}/...` | Equipe de backend | Antes de validar essa subrota |
-| P-17 | Conectar a verificação de saúde do armazenamento ao endpoint `/ready` | O endpoint informa o backend configurado, sem testar acesso ao OCI | Equipe de backend | Fase 8 |
+| P-17 | Conectar a verificação de saúde do armazenamento ao endpoint `/ready` | O endpoint informa o backend configurado, sem testar acesso ao OCI | Equipe de backend | Antes de usar `/ready` como verificação de prontidão real |
+| P-18 | Validar a integração completa do navegador com a API real | Contratos e rotas principais parecem alinhados; executar fluxo E2E de upload, listagem, detalhe e revisão pelo frontend | Equipe de frontend/backend | Antes da demonstração integrada |
+| P-19 | Completar publicação do frontend e backend na OCI | Configuração inicial Docker Compose/Nginx preparada em `deploy/oci/`; ainda falta escolher/validar VM, rede, domínio/TLS e executar o deploy na OCI | Equipe | Antes de publicar na nuvem |
+| P-20 | Disponibilizar acesso seguro ao documento original no frontend | Original e metadados ficam em `sessionStorage` no navegador; backend ainda não expõe download para outros usuários/sessões | Equipe de frontend/backend | Antes do uso multiusuário |
 
 ---
 
@@ -736,30 +739,42 @@ Além dos seis cenários, os testes cobrem: revisão com correção, justificati
 | Sem banco de dados | Listagem limitada; sem consulta ou paginação duráveis; concorrência limitada | Versionar objetos; escrita condicional; documentar limitações |
 | Processamento síncrono | Documento pode ficar preso em `processando` se o processo cair | Original salvo antes do pipeline; reavaliar se houver volume |
 | Documento ilegível pode ocultar urgência | Atraso no atendimento | Fila prioritária se houver sinal de urgência ou origem Pronto-Socorro; nunca descartar em silêncio |
-| Cobertura automatizada OCI incompleta | Regressões no adaptador podem escapar da suíte padrão | Adicionar testes com cliente simulado e uma suíte opcional com conta autorizada; os testes manuais reais já cobriram o fluxo principal |
+| Integração OCI real fora da suíte padrão | Diferenças de credenciais, políticas ou rede da conta podem não ser reproduzidas pelos testes simulados | Manter validação manual com conteúdo sintético em ambiente OCI configurado |
 | Gemini: chamada real ainda não validada | O adaptador Gemini pode continuar sem validação real; a Fase 3 foi concluída com a chamada Groq validada | Usar Groq já validado ou, se necessário, testar Gemini posteriormente somente com conteúdo sintético |
+| Sem configuração de deploy para OCI | A API e os arquivos estáticos não são publicados automaticamente | Preparar execução de produção, proxy reverso, DNS/TLS, segredos e monitoramento antes da publicação |
+| Frontend sem autenticação efetiva no backend | A interface pode ocultar o login, mas as rotas da API continuam sem controle de acesso | Não expor publicamente nem usar dados reais até implementar autenticação e autorização server-side |
+| Metadados do arquivo original no navegador | `sessionStorage` e URL local não dão acesso compartilhado ou persistente ao original | Criar fluxo autenticado de download/consulta do original antes do uso multiusuário |
 | Uso de dados reais | Exigiria controles de privacidade e conformidade | Apenas documentos sintéticos; nenhuma afirmação de conformidade LGPD |
 
 ---
 
 ## 19. Estado atual da implementação
 
-**Fases 0 a 6:** implementadas na branch `dev`. As Fases 5 e 6 entraram pelo merge `0c46772` (PR #1). A Fase 2 cobre ingestão de texto/TXT, PDF digital e digitalizado, PNG/JPEG, limites e erros controlados. As Fases 3 e 4 incluem os provedores mock, Gemini e Groq, o workflow LangGraph, regras determinísticas e revisão humana em memória.
+**Fases 0 a 6:** implementadas. As Fases 5 e 6 entraram pelo merge `0c46772` (PR #1). A Fase 2 cobre ingestão de texto/TXT, PDF digital e digitalizado, PNG/JPEG, limites e erros controlados. As Fases 3 e 4 incluem os provedores mock, Gemini e Groq, o workflow LangGraph, regras determinísticas e revisão humana em memória.
 
 **Fase 7:** o adaptador `OCIStorage` foi integrado à inicialização do FastAPI e ao contrato `StorageBackend`. O SDK `oci` foi adicionado às dependências. O usuário confirmou execução real com dados sintéticos: upload e gravação do PDF original e do JSON no bucket, consulta do resultado pela API, persistência após reiniciar o servidor, `404` para documento inexistente e `409` para tentativa de duplicidade. A resposta identificou o Groq como provedor. O PDF sintético de laboratório usado na demonstração está em `output/pdf/laudo_sintetico_teste_processados.pdf`.
 
+**Fases 8 e 9:** concluídas conforme os registros de teste e integração da equipe. A suíte do backend foi registrada com **129 testes aprovados e 1 ignorado** (restrição de link simbólico no Windows), além de avisos de depreciação de dependência. Os documentos `backend/docs/testes-integracao-fase8.md` e `backend/docs/testes-integracao-groq.md` registram os cenários sintéticos de OCI/Groq, os resultados e as limitações conhecidas. A documentação do backend e os roteiros de execução foram atualizados. A integração do frontend com a API real no navegador e o deploy público não fazem parte da evidência registrada para essas fases.
+
+**Preparação de deploy OCI:** foram criados `.dockerignore` e `deploy/oci/` com imagens Docker do backend e frontend, Compose e Nginx como proxy reverso. O Compose valida a configuração e as duas imagens foram construídas localmente. O build do frontend identificou incompatibilidade de tipos em duas telas legadas (`History` e `Queue`), corrigida para que o build de produção compile. Nenhum recurso Compute ou regra de rede foi criado na tenancy; o perfil OCI local respondeu à consulta do namespace e a região habilitada observada foi `sa-saopaulo-1`. A imagem final do frontend não inclui dependências de desenvolvimento; `npm audit --omit=dev` reportou zero vulnerabilidades. O relatório completo apontou cinco ocorrências altas em `picomatch`, dependência transitiva de ferramentas de build, para as quais o `npm audit` propôs downgrade quebrador do Vite; não foi aplicado upgrade automático.
+
 **Evidências de testes automatizados e manuais:**
 
-- O usuário executou `tests/test_storage.py`: 20 testes aprovados e 1 ignorado porque o Windows não permitiu criar links simbólicos. Foram exibidos 13 avisos de depreciação de uma dependência; não foram falhas.
+- O resultado anterior de `tests/test_storage.py` foi 20 aprovados e 1 ignorado porque o Windows não permitiu criar links simbólicos; foram exibidos 13 avisos de depreciação, sem falha.
+- A validação mais recente registrada para o backend foi 129 aprovados e 1 ignorado. A validação real do OCI/Groq usou conteúdo sintético e credenciais externas ao repositório.
 - A integração OCI foi exercitada manualmente com dados sintéticos, incluindo upload, leitura após reinício, consulta de ID inexistente e conflito de ID duplicado.
-- A suíte completa do backend não foi executada nesta validação. Também não há ainda testes automatizados específicos para o adaptador OCI.
+- O adaptador OCI possui testes automatizados com cliente simulado; a conta OCI real permanece validada manualmente, não na suíte padrão.
 
 **Limitações e pendências:**
 
-- `/ready` informa `STORAGE_BACKEND=oci`, mas não chama `verificar_saude()` nem confirma conectividade; a conectividade foi comprovada pelo fluxo real de upload e consulta.
+- `/ready` informa o backend configurado, mas não chama `verificar_saude()` nem confirma conectividade. O fluxo real de upload e consulta comprovou o acesso OCI nos testes manuais, mas esse endpoint não é uma verificação profunda de prontidão.
 - O plano prevê `processados/urgentes/{id}/...` para urgências encaminhadas diretamente. O código atual grava resultados `processado` sob `processados/{id}/...`; alinhar esse caminho com o requisito antes de considerar essa subrota validada.
-- A paginação acima de mil objetos e testes automatizados com cliente OCI simulado ou conta real não foram executados.
-- A Fase 8 (suíte integrada automatizada) e a Fase 9 (documentação/roteiro final) continuam pendentes. O endpoint `/reroute` também permanece pendente.
+- A paginação acima de mil objetos e os testes automatizados com conta OCI real não foram executados. O endpoint `/reroute` também permanece pendente.
 - A lista de medicamentos de alto risco e as regras clínicas requerem validação da equipe/profissional de saúde. A chamada real ao Gemini permanece opcional e não validada.
+- Os contratos e as rotas principais de documentos do frontend (`/api/v1`) estão alinhados com a API. Ainda é necessário validar o fluxo E2E no navegador com `VITE_USE_MOCK=false`; o proxy do Vite serve apenas ao desenvolvimento.
+- O login do frontend está habilitado por padrão, mas o backend não implementa `/auth/login` nem `/auth/me`. Desabilitá-lo pode ser uma opção temporária para demonstração sintética restrita, mas não protege a API. Autenticação e autorização no backend são pré-requisitos para exposição pública ou dados reais.
+- O frontend usa `sessionStorage` para metadados/URL local do arquivo original, e o backend não oferece rota de download do original; esse fluxo não atende a acesso multiusuário ou entre sessões.
+- Os artefatos iniciais de deploy e o proxy reverso estão preparados, mas VM, rede, domínio/TLS, segredos no host e publicação ainda não foram configurados. A arquitetura encaminha `/api/v1` no mesmo domínio e mantém a porta do backend privada, reduzindo a necessidade de CORS.
+- Para execução OCI, configurar credenciais com privilégio mínimo. A configuração atual do adaptador depende de arquivo de configuração OCI; avaliar Instance Principals para Compute antes de distribuir credenciais de usuário. Chaves do Groq devem existir apenas no ambiente/gerenciador de segredos do backend, nunca em variáveis `VITE_*`.
 
-**Próximo passo:** concluir a cobertura automatizada integrada da Fase 8 e resolver os alinhamentos de health check e prefixo de urgência registrados acima.
+**Próximos passos:** (1) validar o Compose com `.env` e configuração OCI destinados ao servidor, sem publicar segredos; (2) escolher ou criar VM e restringir NSG, SSH e HTTP aos IPs autorizados; (3) implantar e registrar o fluxo E2E frontend/API real com dados sintéticos; (4) configurar HTTPS/DNS, segredos e observabilidade; (5) implementar autenticação/autorização antes de exposição pública; (6) tratar acesso multiusuário ao documento original e alinhar o prefixo de urgências e a prontidão do `/ready` conforme a necessidade operacional.

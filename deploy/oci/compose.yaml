@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/oci/backend.Dockerfile
+    env_file:
+      - ../../backend/.env
+    environment:
+      APP_ENV: production
+      STORAGE_BACKEND: oci
+      OCI_CONFIG_PROFILE: ${OCI_CONFIG_PROFILE:-DEFAULT}
+    volumes:
+      - ${OCI_CONFIG_DIR:?Configure OCI_CONFIG_DIR no arquivo .env do deploy}:/home/mediflow/.oci:ro
+    expose:
+      - "8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: deploy/oci/frontend.Dockerfile
+      args:
+        VITE_USE_MOCK: "false"
+        VITE_API_URL: /api/v1
+        VITE_AUTH_ENABLED: ${VITE_AUTH_ENABLED:-false}
+        VITE_MAX_UPLOAD_MB: ${VITE_MAX_UPLOAD_MB:-10}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-8080}:80"
+    restart: unless-stopped
