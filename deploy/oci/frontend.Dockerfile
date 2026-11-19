@@ -1,13 +1,14 @@
 FROM node:22-alpine AS build
 
 WORKDIR /app
+ENV NODE_OPTIONS=--max-old-space-size=512
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
 COPY frontend/ ./
 ARG VITE_USE_MOCK=false
 ARG VITE_API_URL=/api/v1
-ARG VITE_AUTH_ENABLED=false
+ARG VITE_AUTH_ENABLED=true
 ARG VITE_MAX_UPLOAD_MB=10
 ENV VITE_USE_MOCK=${VITE_USE_MOCK} \
     VITE_API_URL=${VITE_API_URL} \

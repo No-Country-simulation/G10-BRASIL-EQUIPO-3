@@ -9,6 +9,7 @@ services:
       APP_ENV: production
       STORAGE_BACKEND: oci
       OCI_CONFIG_PROFILE: ${OCI_CONFIG_PROFILE:-DEFAULT}
+      AUTH_ENABLED: ${AUTH_ENABLED:-true}
     volumes:
       - ${OCI_CONFIG_DIR:?Configure OCI_CONFIG_DIR no arquivo .env do deploy}:/home/mediflow/.oci:ro
     expose:
@@ -32,7 +33,7 @@ services:
       args:
         VITE_USE_MOCK: "false"
         VITE_API_URL: /api/v1
-        VITE_AUTH_ENABLED: ${VITE_AUTH_ENABLED:-false}
+        VITE_AUTH_ENABLED: ${AUTH_ENABLED:-true}
         VITE_MAX_UPLOAD_MB: ${VITE_MAX_UPLOAD_MB:-10}
     depends_on:
       backend:
