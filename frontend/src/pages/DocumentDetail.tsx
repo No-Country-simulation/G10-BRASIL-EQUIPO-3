@@ -1,5 +1,6 @@
 import {Link, useParams} from 'react-router-dom';
 import {ArrowLeft, ExternalLink} from 'lucide-react';
+import {useArquivoOriginal} from '../hooks/useArquivoOriginal';
 import {useDocumento} from '../hooks/useDocumento';
 import {useOpenReview} from '../hooks/useOpenReview';
 import {formatDateTime} from '../lib/format';
@@ -20,6 +21,7 @@ export default function DocumentDetail() {
   const {id = ''} = useParams();
   const openReview = useOpenReview();
   const {view: doc, erro, carregando, recarregar} = useDocumento(id);
+  const {arquivo} = useArquivoOriginal(doc);
 
   if (carregando) return <LoadingState label="Carregando documento..." />;
   if (!doc) return <ErrorState message={erro || 'Documento não encontrado.'} onRetry={recarregar} />;
@@ -40,8 +42,8 @@ export default function DocumentDetail() {
           </p>
         </div>
         <div className="head-buttons">
-          {doc.arquivo && (
-            <a className="secondary link-as-button" href={doc.arquivo.url} target="_blank" rel="noreferrer">
+          {arquivo && (
+            <a className="secondary link-as-button" href={arquivo.url} target="_blank" rel="noreferrer">
               <ExternalLink size={15} /> Ver original
             </a>
           )}

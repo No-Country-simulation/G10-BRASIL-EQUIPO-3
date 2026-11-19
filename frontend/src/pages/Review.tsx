@@ -11,6 +11,7 @@ import {isConflitoDeVersao, mensagemDeErro} from '../services/errors';
 import {ConfidenceMeter} from '../components/ConfidenceMeter';
 import {CampoRevisaoRow} from '../components/CampoRevisaoRow';
 import {DocumentViewer} from '../components/DocumentViewer';
+import {useArquivoOriginal} from '../hooks/useArquivoOriginal';
 import {PriorityTag} from '../components/PriorityTag';
 import {StatusBadge} from '../components/StatusBadge';
 import {ErrorState, LoadingState} from '../components/States';
@@ -39,6 +40,7 @@ export default function Review() {
   const {preferencias, salvar} = useSettings();
   const origin = (location.state as {from?: string} | null)?.from ?? '/processar?tab=pendentes';
   const {view: doc, erro: erroCarga, carregando, recarregar} = useDocumento(id);
+  const {arquivo} = useArquivoOriginal(doc);
 
   const [edicoes, setEdicoes] = useState<EdicoesRevisao>({});
   const [justificativa, setJustificativa] = useState('');
@@ -167,7 +169,7 @@ export default function Review() {
       )}
 
       <div className="review-grid">
-        <DocumentViewer doc={doc} activeChave={activeChave} onSelectField={setActiveChave} />
+        <DocumentViewer doc={doc} arquivo={arquivo} activeChave={activeChave} onSelectField={setActiveChave} />
 
         <div className="review-side">
           <div className="card">

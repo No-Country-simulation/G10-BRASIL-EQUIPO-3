@@ -4,7 +4,7 @@ import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {build} from 'vite';
 
-const backend = resolve(process.argv[2] ?? process.env.MEDIFLOW_BACKEND_DIR ?? '../G10-BRASIL-EQUIPO-3-main/backend');
+const backend = resolve(process.argv[2] ?? process.env.MEDIFLOW_BACKEND_DIR ?? '../backend');
 const tmp = mkdtempSync(join(tmpdir(), 'mediflow-exemplos-'));
 
 await build({

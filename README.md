@@ -255,9 +255,22 @@ python -m pytest -q
 Remove-Item Env:STORAGE_BACKEND
 ```
 
-Na última execução validada, a suíte apresentou **129 testes aprovados e 1 ignorado**. Os resultados podem variar conforme novas alterações no código.
+Na última execução validada, a suíte apresentou **179 testes aprovados**. Os resultados podem variar conforme novas alterações no código.
 
-### 8. Documentação dos testes integrados
+### 8. Executar o frontend integrado ao backend
+
+Com a API rodando em `http://localhost:8000` (passo 5), em outro terminal:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev          # http://localhost:5173
+```
+
+Detalhes (rotas, login opcional, CORS e limitações): [`docs/INTEGRACAO_BACKEND.md`](docs/INTEGRACAO_BACKEND.md).
+
+### 9. Documentação dos testes integrados
 
 - [Fase 8 — Testes integrados com OCI](backend/docs/testes-integracao-fase8.md)
 - [Testes com Groq real e OCI](backend/docs/testes-integracao-groq.md)

@@ -7,6 +7,8 @@
  *   POST /documents/triage          → RespostaTriagem     (JSON `EntradaTriagem`)
  *   POST /documents/triage/upload   → RespostaTriagem     (multipart: arquivo, tipo_arquivo, canal_origem)
  *   POST /documents/{id}/review     → RespostaTriagem     (JSON `RequisicaoRevisao`; 409 se versão/estado inválido)
+ *   GET  /documents/{id}/original   → arquivo (PDF/PNG/JPEG) enviado; 404 se o documento entrou como texto
+ *   POST /auth/login, GET /auth/me  → login do MVP (ver `services/auth.ts`)
  * O processamento é SÍNCRONO: a resposta do POST já traz o resultado final (processado/em_auditoria/erro).
  */
 import {config} from '../config/env';
@@ -21,6 +23,7 @@ export const ROTAS = {
   triagemTexto: '/documents/triage',
   triagemUpload: '/documents/triage/upload',
   revisao: (id: string) => `/documents/${encodeURIComponent(id)}/review`,
+  original: (id: string) => `/documents/${encodeURIComponent(id)}/original`,
 } as const;
 
 export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {

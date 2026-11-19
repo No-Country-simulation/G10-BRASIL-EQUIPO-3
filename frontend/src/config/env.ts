@@ -35,8 +35,8 @@ export const config = {
   pollIntervalMs: parsePositiveNumber('VITE_POLL_INTERVAL_MS', env.VITE_POLL_INTERVAL_MS, 1200),
   /** Atualização periódica da lista (alimenta o sininho e a fila). O backend não tem push. */
   refreshIntervalMs: parsePositiveNumber('VITE_REFRESH_INTERVAL_MS', env.VITE_REFRESH_INTERVAL_MS, 30000),
-  /** Login. O backend atual NÃO tem autenticação; com `VITE_AUTH_ENABLED=false` o site abre direto. */
-  authEnabled: env.VITE_AUTH_ENABLED === undefined || env.VITE_AUTH_ENABLED === '' ? true : parseBoolean('VITE_AUTH_ENABLED', env.VITE_AUTH_ENABLED),
+  /** Login (padrão: desligado, como no backend). Precisa casar com `AUTH_ENABLED` do backend. */
+  authEnabled: parseBoolean('VITE_AUTH_ENABLED', env.VITE_AUTH_ENABLED),
 } as const;
 
 export const isMock = config.dataSource === 'mock';

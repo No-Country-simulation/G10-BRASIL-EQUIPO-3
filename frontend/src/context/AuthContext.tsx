@@ -2,6 +2,7 @@ import {createContext, useCallback, useContext, useEffect, useMemo, useState, ty
 import {config} from '../config/env';
 import {aoNaoAutorizado, lerToken, limparToken, salvarToken} from '../lib/session';
 import {entrar, obterUsuario, type Usuario} from '../services/auth';
+import {limparOriginais} from '../services/originais';
 
 type Status = 'carregando' | 'anonimo' | 'autenticado';
 
@@ -26,6 +27,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
   const sair = useCallback((msg: string | null) => {
     limparToken();
+    limparOriginais(); // documentos clínicos em memória não sobrevivem ao logout
     setUsuario(null);
     setAviso(msg);
     setStatus('anonimo');

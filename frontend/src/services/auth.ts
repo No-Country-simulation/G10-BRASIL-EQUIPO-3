@@ -1,12 +1,12 @@
 /**
  * Autenticação.
  *
- * ATENÇÃO: o backend atual do Equipo 03 NÃO possui autenticação. As rotas abaixo são uma PROPOSTA
- * de contrato (ver docs/INTEGRACAO_BACKEND.md) e ficam centralizadas em `ROTAS_AUTH`:
+ * O backend implementa o login do MVP em `backend/app/api/auth.py` (desligado por padrão):
  *   POST /auth/login  {email, senha} → {access_token, token_type, usuario}
  *   GET  /auth/me                    → usuario        (Authorization: Bearer <token>)
- * Enquanto não existirem, use `VITE_AUTH_ENABLED=false`. Em modo demonstração (VITE_USE_MOCK=true)
- * o login é simulado no navegador.
+ * Para usar, ligue `AUTH_ENABLED=true` no backend (ver env.example) e `VITE_AUTH_ENABLED=true` aqui;
+ * os dois lados precisam estar iguais. Em modo demonstração (VITE_USE_MOCK=true) o login é simulado
+ * no navegador.
  */
 import {isMock} from '../config/env';
 import {ApiError} from './errors';
@@ -53,7 +53,7 @@ export function mensagemLogin(e: unknown): string {
     if (e.status === 401 || e.status === 400) return 'E-mail ou senha incorretos.';
     if (e.status === 403) return 'Este usuário não tem permissão de acesso.';
     if (e.status === 404 || e.status === 405)
-      return 'O backend ainda não tem a rota de login (/auth/login). Defina VITE_AUTH_ENABLED=false ou peça à equipe para implementá-la.';
+      return 'O backend está com o login desligado (AUTH_ENABLED=false). Ligue-o no backend ou defina VITE_AUTH_ENABLED=false.';
     if (e.status === 422) return 'Informe um e-mail válido e a senha.';
     if (e.status === 429) return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
   }
