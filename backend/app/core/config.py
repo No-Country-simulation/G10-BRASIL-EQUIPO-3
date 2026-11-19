@@ -4,8 +4,17 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import BaseModel, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class UsuarioAuth(BaseModel):
+    """Usuário do login do MVP (`AUTH_USERS`, em JSON). A senha nunca aparece em repr/logs."""
+
+    email: str = Field(min_length=3, max_length=254)
+    senha: SecretStr
+    nome: str = Field(default="Revisor", min_length=1, max_length=120)
+    perfil: str = Field(default="revisor", min_length=1, max_length=50)
 
 
 class Settings(BaseSettings):
@@ -46,6 +55,18 @@ class Settings(BaseSettings):
     max_upload_size_mb: Annotated[float, Field(gt=0, le=1024)] = 10
     max_pdf_pages: Annotated[int, Field(gt=0, le=1000)] = 30
 
+    # Origens permitidas pelo CORS (em desenvolvimento o proxy do Vite dispensa isto).
+    cors_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:5173", "http://127.0.0.1:5173"]
+    )
+
+    # Login do MVP (desligado por padrão). Quando ligado, as rotas de documentos exigem
+    # `Authorization: Bearer <token>` obtido em `POST /api/v1/auth/login`.
+    auth_enabled: bool = False
+    auth_secret: SecretStr | None = None  # assina os tokens; mínimo de 32 caracteres
+    auth_token_ttl_minutes: Annotated[int, Field(gt=0, le=60 * 24 * 30)] = 480
+    auth_users: list[UsuarioAuth] = Field(default_factory=list)
+
     @model_validator(mode="after")
     def _dependencias_do_modo(self) -> Self:
         faltando: list[str] = []
@@ -67,6 +88,11 @@ class Settings(BaseSettings):
             ):
                 if not valor:
                     faltando.append(nome)
+        if self.auth_enabled:
+            if self.auth_secret is None or len(self.auth_secret.get_secret_value()) < 32:
+                faltando.append("AUTH_SECRET (mínimo de 32 caracteres)")
+            if not self.auth_users:
+                faltando.append("AUTH_USERS")
         if faltando:
             raise ValueError(
                 "configuração incompleta para o modo escolhido; defina: " + ", ".join(faltando)

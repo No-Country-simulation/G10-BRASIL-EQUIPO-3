@@ -1,12 +1,15 @@
+import re
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
+from app.api.auth import exigir_autenticacao
 from app.core.config import carregar_configuracao
 from app.schemas.enums import CanalOrigem, TipoArquivo
 from app.schemas.input import (
+    PADRAO_DOCUMENTO_ID,
     DocumentoRecebido,
     EntradaTriagem,
     gerar_documento_id,
@@ -27,7 +30,17 @@ from app.storage.resultados import (
 router = APIRouter(
     prefix="/api/v1/documents",
     tags=["Documentos"],
+    # Sem efeito com AUTH_ENABLED=false; com ele ligado, exige `Authorization: Bearer <token>`.
+    dependencies=[Depends(exigir_autenticacao)],
 )
+
+# Extensão usada em `chave_documento` -> tipo de mídia devolvido ao visualizar o original.
+_MIDIA_ORIGINAL = {
+    "pdf": "application/pdf",
+    "png": "image/png",
+    "jpeg": "image/jpeg",
+    "txt": "text/plain; charset=utf-8",
+}
 
 
 @router.post("/triage", response_model=RespostaTriagem)
@@ -215,6 +228,41 @@ def consultar_documento(
         )
 
     return resultado
+
+
+@router.get("/{documento_id}/original")
+def baixar_original(
+    documento_id: str,
+    storage: Annotated[StorageBackend, Depends(obter_storage)],
+):
+    """Devolve o arquivo original recebido (para o revisor conferir lado a lado com a extração).
+
+    Só existe para documentos enviados por `/triage/upload`; a entrada JSON (`/triage`) não guarda
+    o arquivo e responde 404.
+    """
+    if not re.fullmatch(PADRAO_DOCUMENTO_ID, documento_id):
+        raise HTTPException(status_code=404, detail="Documento nao encontrado.")
+
+    for extensao, tipo_midia in _MIDIA_ORIGINAL.items():
+        try:
+            conteudo = storage.ler(chave_documento(documento_id, extensao))
+        except OSError as erro:
+            raise HTTPException(
+                status_code=503,
+                detail="Servico de armazenamento indisponivel.",
+            ) from erro
+        if conteudo is not None:
+            return Response(
+                content=conteudo,
+                media_type=tipo_midia,
+                headers={
+                    "Content-Disposition": "inline",
+                    "X-Content-Type-Options": "nosniff",
+                    "Cache-Control": "private, no-store",
+                },
+            )
+
+    raise HTTPException(status_code=404, detail="Arquivo original nao encontrado.")
 
 
 def _executar_revisao_documento(
