@@ -2,7 +2,9 @@ from pathlib import Path
 from threading import Lock
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.auth import router as auth_router
 from app.api.documents import router as documents_router
 from app.api.health import router as health_router
 from app.api.ready import router as ready_router
@@ -35,7 +37,16 @@ def criar_app() -> FastAPI:
     else:
         raise RuntimeError("Backend de armazenamento nao suportado.")
 
+    # Autenticação por cabeçalho Bearer (sem cookies), então não há credenciais de CORS.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "Accept"],
+    )
+
     app.include_router(health_router)
+    app.include_router(auth_router)
     app.include_router(documents_router)
     app.include_router(ready_router)
 
