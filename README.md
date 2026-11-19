@@ -220,10 +220,6 @@ Ainda na pasta `backend`, execute:
 python -m uvicorn app.main:app --port 8000
 ```
 
-Acesse a documentação interativa:
-
-http://127.0.0.1:8000/docs
-
 ### 6. Testar a triagem pelo Swagger
 
 No Swagger UI, utilize:
