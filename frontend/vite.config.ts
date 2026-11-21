@@ -2,8 +2,8 @@ import {defineConfig, loadEnv} from 'vite';
 import react from '@vitejs/plugin-react';
 
 /**
- * Em desenvolvimento, `/api` é encaminhado ao backend (proxy) para evitar CORS.
- * O backend (FastAPI) roda em :8000 por padrão; ver docs/INTEGRACAO_BACKEND.md.
+- Em desenvolvimento, `/api` é encaminhado ao backend (proxy) para evitar CORS.
+- O backend (FastAPI) roda em :8000 por padrão; ver docs/INTEGRACAO_BACKEND.md.
  */
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -11,5 +11,8 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react()],
     server: {proxy: {'/api': {target: alvo, changeOrigin: true}}},
+    preview: {
+      allowedHosts: ['g10-brasil-equipo-3.onrender.com'],
+    },
   };
 });
