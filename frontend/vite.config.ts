@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
     plugins: [react()],
     server: {proxy: {'/api': {target: alvo, changeOrigin: true}}},
     preview: {
-      allowedHosts: ['https://mediflow-gryd.onrender.com/'],
+      allowedHosts: ['mediflow-gryd.onrender.com'],
     },
   };
 });
